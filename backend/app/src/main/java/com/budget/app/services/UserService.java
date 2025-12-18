@@ -65,7 +65,10 @@ public class UserService {
     }
 
     public UserTokenResponseVo validateUserCredentialsAndGenerateToken(UserRequestVo userRequestVo) {
-        User user = userRepository.findUserByStatusAndName(userRequestVo.getUsername());
+        // print userRequestVo
+        System.out.println("Validating user: " + userRequestVo.getUsername());
+        User user = userRepository.findByUserName(userRequestVo.getUsername());
+        System.out.println("User found: " + (user != null ? user.getUserName() : "null"));
         if (user != null &&
                 bCryptPasswordEncoder.matches(userRequestVo.getPassword(),
                 user.getPassword())) {
