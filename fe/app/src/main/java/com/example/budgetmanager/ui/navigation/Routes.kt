@@ -10,6 +10,8 @@ object Routes {
     const val SETTINGS = "Settings"
 
     const val BUDGET_DETAILS = "budget_details"
+    const val SUMMARY = "summary"
 
     fun budgetDetails(id: Long): String = "$BUDGET_DETAILS/$id"
+    fun summary(id: Long): String = "$SUMMARY/$id"
 }

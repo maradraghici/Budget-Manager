@@ -12,6 +12,7 @@ import com.example.budgetmanager.ui.screen.budgetdetails.BudgetDetailsScreenDest
 import com.example.budgetmanager.ui.screen.home.HomeScreenDestination
 import com.example.budgetmanager.ui.screen.main.TopBarEvent
 import com.example.budgetmanager.ui.screen.settings.SettingsScreenDestination
+import com.example.budgetmanager.ui.screen.summary.SummaryScreenDestination
 
 @Composable
 fun AppNavGraph(
@@ -42,6 +43,16 @@ fun AppNavGraph(
             arguments = listOf(navArgument("id") { type = NavType.LongType })
         ) {
             BudgetDetailsScreenDestination(
+                onTopBarEvent = onTopBarEvent,
+                navigateToSummary = { id ->
+                    navController.navigate(Routes.summary(id))
+                },
+                modifier = modifier
+            )
+        }
+
+        composable("${Routes.SUMMARY}/{id}") {
+            SummaryScreenDestination(
                 onTopBarEvent = onTopBarEvent,
                 modifier = modifier
             )

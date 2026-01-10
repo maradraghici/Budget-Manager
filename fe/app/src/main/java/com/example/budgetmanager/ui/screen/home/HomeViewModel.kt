@@ -67,16 +67,10 @@ class HomeViewModel @Inject constructor(
                 }
             }
             is HomeEvent.ShowDeleteBudgetChanged -> {
-                if (_state.value.showDeleteBudget) {
-                    _state.value = _state.value.copy(
-                        showDeleteBudget = false,
-                        deleteBudgetId = null
-                    )
-                } else {
-                    _state.value = _state.value.copy(
-                        showDeleteBudget = true
-                    )
-                }
+                _state.value = _state.value.copy(
+                    showDeleteBudget = false,
+                    deleteBudgetId = null
+                )
             }
             is HomeEvent.BudgetDescriptionChanged -> {
                 _state.value = _state.value.copy(budgetDescription = event.description)

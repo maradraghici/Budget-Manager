@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.budgetmanager.R
 import com.example.budgetmanager.ui.components.BudgetCard
+import com.example.budgetmanager.ui.components.ConfirmModalBottomSheet
+import com.example.budgetmanager.ui.components.DefaultModalBottomSheet
 import kotlinx.coroutines.launch
 
 @Composable
@@ -60,9 +62,6 @@ private fun HomeScreen(
     onEvent: (HomeEvent) -> Unit,
     modifier: Modifier
 ) {
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
-
     Column(
         modifier = modifier.padding(horizontal = 24.dp)
     ) {
@@ -119,143 +118,35 @@ private fun HomeScreen(
     }
 
     if (state.showCreateBudget) {
-        ModalBottomSheet(
-            onDismissRequest = {
-                onEvent(HomeEvent.ShowCreateBudgetChanged)
+        DefaultModalBottomSheet(
+            title = "Create a budget",
+            onDismiss = { onEvent(HomeEvent.ShowCreateBudgetChanged) },
+            onConfirm = { onEvent(HomeEvent.CreateBudgetClicked) },
+            dismissLabel = "Cancel",
+            confirmLabel = "Create",
+            firstFieldLabel = "Name",
+            firstFieldValue = state.budgetName,
+            firstFieldValueChange = {
+                if (it.length <= 30) {
+                    onEvent(HomeEvent.BudgetNameChanged(it))
+                }
             },
-            sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.surface,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Create a budget",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                OutlinedTextField(
-                    value = state.budgetName,
-                    onValueChange = {
-                        if (it.length <= 30) {
-                            onEvent(HomeEvent.BudgetNameChanged(it))
-                        }
-                    },
-                    label = { Text("Name") },
-                    shape = RoundedCornerShape(20.dp),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
-                )
-
-                OutlinedTextField(
-                    value = state.budgetDescription,
-                    onValueChange = {
-                        if (it.length <= 100) {
-                            onEvent(HomeEvent.BudgetDescriptionChanged(it))
-                        }
-                    },
-                    label = { Text("Description") },
-                    shape = RoundedCornerShape(20.dp),
-                    maxLines = 3,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                if (!sheetState.isVisible) {
-                                    onEvent(HomeEvent.ShowCreateBudgetChanged)
-                                }
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        shape = RoundedCornerShape(20.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .height(50.dp)
-                    ) {
-                        Text(
-                            text = "Cancel",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                color = MaterialTheme.colorScheme.tertiary
-                            )
-                        )
-                    }
-
-                    Button(
-                        onClick = {
-                            onEvent(HomeEvent.CreateBudgetClicked)
-                            scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                if (!sheetState.isVisible) {
-                                    onEvent(HomeEvent.ShowCreateBudgetChanged)
-                                }
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        shape = RoundedCornerShape(20.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .height(50.dp)
-                    ) {
-                        Text(
-                            text = "Create",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+            secondFieldLabel = "Description",
+            secondFieldValue = state.budgetDescription,
+            secondFieldValueChange = {
+                if (it.length <= 100) {
+                    onEvent(HomeEvent.BudgetDescriptionChanged(it))
                 }
             }
-        }
+        )
     }
 
     if (state.showDeleteBudget) {
-        ModalBottomSheet(
-            onDismissRequest = {
-                onEvent(HomeEvent.ShowDeleteBudgetChanged)
-            },
-            sheetState = sheetState
-        ) {
-            Button(
-                onClick = {
-                    onEvent(HomeEvent.DeleteBudgetClicked)
-                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                        if (!sheetState.isVisible) {
-                            onEvent(HomeEvent.ShowDeleteBudgetChanged)
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.inversePrimary
-                ),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 16.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "Delete Budget",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                )
-            }
-        }
+        ConfirmModalBottomSheet(
+            onDismiss = { onEvent(HomeEvent.ShowDeleteBudgetChanged) },
+            onConfirm = { onEvent(HomeEvent.DeleteBudgetClicked) },
+            label = "Delete Budget"
+        )
     }
 }
 
