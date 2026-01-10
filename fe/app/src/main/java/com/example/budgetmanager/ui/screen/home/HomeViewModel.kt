@@ -9,12 +9,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,6 +19,7 @@ data class HomeState(
     val budgetPreviewList: List<BudgetPreview> = budgetPreviewListLocal,
     val budgetName: String = "",
     val budgetDescription: String = "",
+    val deleteBudgetId: Long? = null,
     val showCreateBudget: Boolean = false,
     val showDeleteBudget: Boolean = false
 )
@@ -32,6 +30,7 @@ sealed interface HomeEvent {
     data object ShowCreateBudgetChanged : HomeEvent
     data object ShowDeleteBudgetChanged : HomeEvent
     data object CreateBudgetClicked : HomeEvent
+    data object DeleteBudgetClicked : HomeEvent
     data class OnBudgetHold(val id: Long, val ownerId: Long) : HomeEvent
 
     data class OnBudgetClick(val id: Long) : HomeEvent
@@ -68,9 +67,16 @@ class HomeViewModel @Inject constructor(
                 }
             }
             is HomeEvent.ShowDeleteBudgetChanged -> {
-                _state.value = _state.value.copy(
-                    showDeleteBudget = !_state.value.showDeleteBudget
-                )
+                if (_state.value.showDeleteBudget) {
+                    _state.value = _state.value.copy(
+                        showDeleteBudget = false,
+                        deleteBudgetId = null
+                    )
+                } else {
+                    _state.value = _state.value.copy(
+                        showDeleteBudget = true
+                    )
+                }
             }
             is HomeEvent.BudgetDescriptionChanged -> {
                 _state.value = _state.value.copy(budgetDescription = event.description)
@@ -81,11 +87,15 @@ class HomeViewModel @Inject constructor(
             is HomeEvent.CreateBudgetClicked -> {
                 // Call backend to create a new budget and update the list
             }
+            is HomeEvent.DeleteBudgetClicked -> {
+                // Call backend to delete the budget and update the list
+            }
             is HomeEvent.OnBudgetHold -> viewModelScope.launch {
                 val storedUserId = UserPreferences.userIdFlow(context).first()
                 if(storedUserId == event.ownerId) {
                     _state.value = _state.value.copy(
-                        showDeleteBudget = true
+                        showDeleteBudget = true,
+                        deleteBudgetId = event.id
                     )
                 }
             }

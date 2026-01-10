@@ -231,6 +231,7 @@ private fun HomeScreen(
         ) {
             Button(
                 onClick = {
+                    onEvent(HomeEvent.DeleteBudgetClicked)
                     scope.launch { sheetState.hide() }.invokeOnCompletion {
                         if (!sheetState.isVisible) {
                             onEvent(HomeEvent.ShowDeleteBudgetChanged)

@@ -6,20 +6,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -29,18 +35,44 @@ import com.example.budgetmanager.ui.navigation.Routes
 
 @Composable
 fun MainScreenDestination(navigateToAuth: () -> Unit) {
-    MainScreen()
+    val vm: TopBarViewModel = hiltViewModel()
+    val state by vm.state.collectAsState()
+
+    MainScreen(state, vm::onEvent)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MainScreen() {
+private fun MainScreen(state: TopBarState, onEvent: (event: TopBarEvent) -> Unit) {
     val appNavController = rememberNavController()
+    val navBackStackEntry by appNavController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
     Scaffold(
-        bottomBar = {
-            val navBackStackEntry by appNavController.currentBackStackEntryAsState()
-            val currentDestination = navBackStackEntry?.destination
+        topBar = {
+            if (currentDestination?.route !in bottomNavItems.keys) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = state.title,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { appNavController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBackIosNew,
+                                contentDescription = "Back",
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                    }
+                )
+            }
+        },
 
+        bottomBar = {
             if (currentDestination?.route in bottomNavItems.keys) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.onPrimary
@@ -95,6 +127,7 @@ private fun MainScreen() {
     ) { innerPadding ->
         AppNavGraph(
             navController = appNavController,
+            onTopBarEvent = onEvent,
             modifier = Modifier.padding(innerPadding)
         )
     }

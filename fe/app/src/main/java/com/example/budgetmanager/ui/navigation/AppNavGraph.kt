@@ -10,13 +10,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.budgetmanager.ui.screen.budgetdetails.BudgetDetailsScreenDestination
 import com.example.budgetmanager.ui.screen.home.HomeScreenDestination
+import com.example.budgetmanager.ui.screen.main.TopBarEvent
 import com.example.budgetmanager.ui.screen.settings.SettingsScreenDestination
 
 @Composable
 fun AppNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Routes.HOME
+    startDestination: String = Routes.HOME,
+    onTopBarEvent: (event: TopBarEvent) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -39,7 +41,10 @@ fun AppNavGraph(
             route = "${Routes.BUDGET_DETAILS}/{id}",
             arguments = listOf(navArgument("id") { type = NavType.LongType })
         ) {
-            BudgetDetailsScreenDestination(modifier = modifier)
+            BudgetDetailsScreenDestination(
+                onTopBarEvent = onTopBarEvent,
+                modifier = modifier
+            )
         }
     }
 }
