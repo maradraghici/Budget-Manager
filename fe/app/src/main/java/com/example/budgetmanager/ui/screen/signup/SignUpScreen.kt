@@ -47,6 +47,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budgetmanager.R
 import com.example.budgetmanager.ui.theme.BudgetManagerTheme
@@ -57,7 +58,7 @@ fun SignUpScreenDestination(
     onLoginClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val vm : SignUpViewModel = viewModel()
+    val vm : SignUpViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
 
     LaunchedEffect(Unit) {

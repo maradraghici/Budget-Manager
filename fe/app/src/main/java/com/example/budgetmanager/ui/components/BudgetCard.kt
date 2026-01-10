@@ -1,6 +1,8 @@
 package com.example.budgetmanager.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,14 +20,26 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BudgetCard(title: String, description: String, image: Painter, modifier: Modifier) {
+fun BudgetCard(
+    title: String,
+    description: String,
+    image: Painter,
+    onClick: () -> Unit,
+    onHold: () -> Unit,
+    modifier: Modifier
+) {
     Card(
         colors = CardDefaults.cardColors().copy(
             containerColor = MaterialTheme.colorScheme.onPrimary
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = modifier,
+        modifier = modifier
+            .combinedClickable(
+                onClick = { onClick() },
+                onLongClick = { onHold() }
+            )
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp)

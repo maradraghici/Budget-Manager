@@ -39,11 +39,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.budgetmanager.R
-import com.example.budgetmanager.ui.theme.BudgetManagerTheme
 
 @Composable
 fun LoginScreenDestination(
@@ -51,7 +49,7 @@ fun LoginScreenDestination(
     onSignUpClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val vm : LoginViewModel = viewModel()
+    val vm : LoginViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -259,13 +257,5 @@ fun LoginScreen(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    BudgetManagerTheme {
-        LoginScreenDestination(onLoginSuccess = {}, onSignUpClick = {})
     }
 }

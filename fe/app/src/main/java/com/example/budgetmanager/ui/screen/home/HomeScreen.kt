@@ -17,6 +17,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,15 +27,28 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.budgetmanager.R
 import com.example.budgetmanager.ui.components.BudgetCard
 import kotlinx.coroutines.launch
 
 @Composable
-fun HomeScreenDestination(modifier: Modifier) {
-    val vm: HomeViewModel = viewModel()
+fun HomeScreenDestination(
+    onBudgetClick: (Long) -> Unit,
+    modifier: Modifier
+) {
+    val vm: HomeViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        vm.effect.collect { effect ->
+            when (effect) {
+                is HomeEffect.OnBudgetClick -> {
+                    onBudgetClick(effect.id)
+                }
+            }
+        }
+    }
 
     HomeScreen(state, vm::onEvent, modifier = modifier)
 }
@@ -73,6 +87,12 @@ private fun HomeScreen(
                     title = budget.title,
                     description = budget.description,
                     image = painterResource(id = budgetImages[(budget.id % budgetImages.size).toInt()]),
+                    onClick = {
+                        onEvent(HomeEvent.OnBudgetClick(budget.id))
+                    },
+                    onHold = {
+                        onEvent(HomeEvent.OnBudgetHold(budget.id, budget.owmerId))
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
@@ -81,7 +101,7 @@ private fun HomeScreen(
         }
 
         Button(
-            onClick = { onEvent(HomeEvent.BottomSheetStateChanged) },
+            onClick = { onEvent(HomeEvent.ShowCreateBudgetChanged) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
@@ -101,7 +121,7 @@ private fun HomeScreen(
     if (state.showCreateBudget) {
         ModalBottomSheet(
             onDismissRequest = {
-                onEvent(HomeEvent.BottomSheetStateChanged)
+                onEvent(HomeEvent.ShowCreateBudgetChanged)
             },
             sheetState = sheetState,
             containerColor = MaterialTheme.colorScheme.surface,
@@ -153,7 +173,7 @@ private fun HomeScreen(
                         onClick = {
                             scope.launch { sheetState.hide() }.invokeOnCompletion {
                                 if (!sheetState.isVisible) {
-                                    onEvent(HomeEvent.BottomSheetStateChanged)
+                                    onEvent(HomeEvent.ShowCreateBudgetChanged)
                                 }
                             }
                         },
@@ -179,7 +199,7 @@ private fun HomeScreen(
                             onEvent(HomeEvent.CreateBudgetClicked)
                             scope.launch { sheetState.hide() }.invokeOnCompletion {
                                 if (!sheetState.isVisible) {
-                                    onEvent(HomeEvent.BottomSheetStateChanged)
+                                    onEvent(HomeEvent.ShowCreateBudgetChanged)
                                 }
                             }
                         },
@@ -198,6 +218,41 @@ private fun HomeScreen(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    if (state.showDeleteBudget) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                onEvent(HomeEvent.ShowDeleteBudgetChanged)
+            },
+            sheetState = sheetState
+        ) {
+            Button(
+                onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            onEvent(HomeEvent.ShowDeleteBudgetChanged)
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.inversePrimary
+                ),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 16.dp)
+                    .height(50.dp)
+            ) {
+                Text(
+                    text = "Delete Budget",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
             }
         }
     }

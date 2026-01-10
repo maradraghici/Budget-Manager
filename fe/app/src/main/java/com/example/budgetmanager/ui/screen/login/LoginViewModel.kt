@@ -1,12 +1,17 @@
 package com.example.budgetmanager.ui.screen.login
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.budgetmanager.data.local.UserPreferences
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class LoginState(
     val phoneNumber: String = "",
@@ -29,7 +34,10 @@ sealed interface LoginEffect {
     data object OnSignUpClick : LoginEffect
 }
 
-class LoginViewModel : ViewModel() {
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    @ApplicationContext private val context: Context
+) : ViewModel() {
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
 
@@ -52,6 +60,7 @@ class LoginViewModel : ViewModel() {
                 //...
 
                 viewModelScope.launch {
+                    UserPreferences.saveUserId(context, 1)
                     _effect.emit(LoginEffect.OnLoginSuccess)
                 }
 
