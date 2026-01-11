@@ -51,7 +51,10 @@ fun AppNavGraph(
             )
         }
 
-        composable("${Routes.SUMMARY}/{id}") {
+        composable(
+            route = "${Routes.SUMMARY}/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.LongType })
+        ){
             SummaryScreenDestination(
                 onTopBarEvent = onTopBarEvent,
                 modifier = modifier

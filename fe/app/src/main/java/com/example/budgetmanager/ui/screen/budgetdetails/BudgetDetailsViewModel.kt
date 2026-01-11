@@ -194,5 +194,17 @@ internal val budgetDetailsPreview = BudgetDetails(
             ),
             date = "21/03/2025"
         )
+    ),
+    users = listOf(
+        User(
+            id = 1,
+            username = "Marcel",
+            phoneNumber = "+40723456789"
+        ),
+        User(
+            id = 2,
+            username = "Marcu",
+            phoneNumber = "+40721239333",
+        )
     )
 )
