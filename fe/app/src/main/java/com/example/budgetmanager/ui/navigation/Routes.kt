@@ -9,6 +9,9 @@ object Routes {
     const val HOME = "Home"
     const val SETTINGS = "Settings"
 
+    const val CONNECTIONS = "connections"
+    const val PROFILE = "profile"
+
     const val BUDGET_DETAILS = "budget_details"
     const val SUMMARY = "summary"
 

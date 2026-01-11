@@ -9,8 +9,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.budgetmanager.ui.screen.budgetdetails.BudgetDetailsScreenDestination
+import com.example.budgetmanager.ui.screen.connections.ConnectionsScreenDestination
 import com.example.budgetmanager.ui.screen.home.HomeScreenDestination
 import com.example.budgetmanager.ui.screen.main.TopBarEvent
+import com.example.budgetmanager.ui.screen.profile.ProfileScreenDestination
 import com.example.budgetmanager.ui.screen.settings.SettingsScreenDestination
 import com.example.budgetmanager.ui.screen.summary.SummaryScreenDestination
 
@@ -35,7 +37,15 @@ fun AppNavGraph(
         }
 
         composable(Routes.SETTINGS) {
-            SettingsScreenDestination(modifier = modifier)
+            SettingsScreenDestination(
+                onConnectionsClick = {
+                    navController.navigate(Routes.CONNECTIONS)
+                },
+                onProfileClick = {
+                    navController.navigate(Routes.PROFILE)
+                },
+                modifier = modifier
+            )
         }
 
         composable(
@@ -59,6 +69,14 @@ fun AppNavGraph(
                 onTopBarEvent = onTopBarEvent,
                 modifier = modifier
             )
+        }
+
+        composable(Routes.CONNECTIONS) {
+            ConnectionsScreenDestination(modifier = modifier)
+        }
+
+        composable(Routes.PROFILE) {
+            ProfileScreenDestination(modifier = modifier)
         }
     }
 }
