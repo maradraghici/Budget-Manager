@@ -11,7 +11,7 @@ data class TopBarState(
 )
 
 sealed class TopBarEvent {
-    data class TitleChanged(val title: String) : TopBarEvent()
+    data class OnTitleChanged(val title: String) : TopBarEvent()
 }
 
 @HiltViewModel
@@ -21,7 +21,7 @@ class TopBarViewModel @Inject constructor() : ViewModel() {
 
     fun onEvent(event: TopBarEvent) {
         when(event) {
-            is TopBarEvent.TitleChanged -> {
+            is TopBarEvent.OnTitleChanged -> {
                 _state.value = _state.value.copy(title = event.title)
             }
         }

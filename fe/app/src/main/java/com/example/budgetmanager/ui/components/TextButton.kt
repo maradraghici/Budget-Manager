@@ -18,7 +18,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun TextButton(
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    hasTrailingButton: Boolean = true
 ) {
     Row(
         modifier = Modifier
@@ -35,11 +36,13 @@ fun TextButton(
             ),
             modifier = Modifier.weight(1f)
         )
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.tertiary
-        )
+        if (hasTrailingButton) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.tertiary
+            )
+        }
     }
     HorizontalDivider(
         modifier = Modifier

@@ -54,7 +54,7 @@ fun BudgetDetailsScreenDestination(
 
     LaunchedEffect(state.budgetDetails?.title) {
         state.budgetDetails?.let {
-            onTopBarEvent(TopBarEvent.TitleChanged(it.title))
+            onTopBarEvent(TopBarEvent.OnTitleChanged(it.title))
         }
     }
 

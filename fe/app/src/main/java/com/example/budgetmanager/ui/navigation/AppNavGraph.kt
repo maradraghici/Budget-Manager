@@ -72,7 +72,10 @@ fun AppNavGraph(
         }
 
         composable(Routes.CONNECTIONS) {
-            ConnectionsScreenDestination(modifier = modifier)
+            ConnectionsScreenDestination(
+                onTopBarEvent = onTopBarEvent,
+                modifier = modifier
+            )
         }
 
         composable(Routes.PROFILE) {

@@ -32,7 +32,7 @@ fun SummaryScreenDestination(
     val state by vm.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        onTopBarEvent(TopBarEvent.TitleChanged("Summary"))
+        onTopBarEvent(TopBarEvent.OnTitleChanged("Summary"))
     }
 
     SummaryScreen(state, modifier)
