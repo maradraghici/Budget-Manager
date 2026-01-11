@@ -151,8 +151,8 @@ private fun SignUpScreen(
                 OutlinedTextField(
                     value = state.username,
                     onValueChange = { newUsername ->
-                        val usernameRegex = Regex("^[A-Za-z0-9.]*\$")
-                        if (newUsername.length <= 12 && newUsername.matches(usernameRegex)) {
+                        val usernameRegex = Regex("^[A-Za-z0-9. ]*\$")
+                        if (newUsername.length <= 20 && newUsername.matches(usernameRegex)) {
                             onEvent(SignUpEvent.UsernameChanged(newUsername))
                         }
                     },
@@ -328,7 +328,7 @@ private fun SignUpScreen(
                         .height(56.dp),
                     shape = RoundedCornerShape(20.dp),
                     enabled = state.phoneNumber.length == 12 && state.password.length >= 6 &&
-                            state.secondPassword == state.password && state.termsAccepted && state.username.isNotEmpty()
+                            state.secondPassword == state.password && state.termsAccepted && state.username.isNotBlank()
                 ) {
                     Text(
                         text = "Sign Up",

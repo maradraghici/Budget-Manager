@@ -2,11 +2,15 @@ package com.example.budgetmanager.ui.screen.connections
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.budgetmanager.data.local.User
+import com.example.budgetmanager.data.local.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ConnectionsState(
@@ -67,7 +71,8 @@ class ConnectionsViewModel @Inject constructor(
         }
     }
 
-    private fun loadConnections() {
+    private fun loadConnections()  = viewModelScope.launch {
+        val storedUserId = UserPreferences.userIdFlow(context).first()
         _state.value = _state.value.copy(
             connectionsList = connectionsListLocal
         )

@@ -79,7 +79,10 @@ fun AppNavGraph(
         }
 
         composable(Routes.PROFILE) {
-            ProfileScreenDestination(modifier = modifier)
+            ProfileScreenDestination(
+                onTopBarEvent = onTopBarEvent,
+                modifier = modifier
+            )
         }
     }
 }
