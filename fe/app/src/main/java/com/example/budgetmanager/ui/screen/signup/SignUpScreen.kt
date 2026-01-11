@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
@@ -87,264 +89,272 @@ private fun SignUpScreen(
             .background(MaterialTheme.colorScheme.primary)
     )
 
-    Column(
-        modifier = modifier
-    ) {
-        Spacer(
-            modifier = Modifier
-                .height(53.dp)
-                .fillMaxWidth()
-        )
-
+    Column (
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(
-                        topStart = 30.dp,
-                        topEnd = 30.dp
-                    )
-                )
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = modifier.verticalScroll(rememberScrollState()).weight(1f)
         ) {
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            Text(
-                text = "Welcome to us,",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    color = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier.align(Alignment.Start)
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = "Hello there, create a New Account",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = MaterialTheme.colorScheme.secondary
-                ),
-                modifier = Modifier.align(Alignment.Start)
-            )
-
-            Spacer(modifier = Modifier.height(50.dp))
-
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "App Logo",
+            Spacer(
                 modifier = Modifier
-                    .width(180.dp)
-            )
-
-            Spacer(modifier = Modifier.height(50.dp))
-
-            OutlinedTextField(
-                value = state.username,
-                onValueChange = { newUsername ->
-                    val usernameRegex = Regex("^[A-Za-z0-9.]*\$")
-                    if (newUsername.length <= 12 && newUsername.matches(usernameRegex)) {
-                        onEvent(SignUpEvent.UsernameChanged(newUsername))
-                    }
-                },
-                label = { Text("Username") },
-                shape = RoundedCornerShape(20.dp),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            var phoneFieldValue by remember {
-                mutableStateOf(
-                    TextFieldValue(
-                        text = state.phoneNumber,
-                        selection = TextRange(state.phoneNumber.length)
-                    )
-                )
-            }
-
-            OutlinedTextField(
-                value = phoneFieldValue,
-                onValueChange = { newValue ->
-                    var phone = newValue.text
-
-                    if (phone.isNotEmpty() && !phone.startsWith("+")) {
-                        phone = "+$phone"
-                    }
-
-                    val phoneRegex = Regex("^\\+?\\d{0,11}$")
-                    if (!phone.matches(phoneRegex)) return@OutlinedTextField
-
-                    phoneFieldValue = TextFieldValue(
-                        text = phone,
-                        selection = TextRange(phone.length)
-                    )
-
-                    onEvent(SignUpEvent.PhoneNumberChanged(phone))
-                },
-                label = { Text("Phone Number") },
-                shape = RoundedCornerShape(20.dp),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                isError = if (state.phoneNumber.isEmpty()) false else state.phoneNumber.length < 12,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            OutlinedTextField(
-                value = state.password,
-                onValueChange = { newPassword ->
-                    val passwordRegex = Regex("^[A-Za-z0-9,.?!@#\$]*\$")
-                    if (newPassword.matches(passwordRegex)) {
-                        onEvent(SignUpEvent.PasswordChanged(newPassword))
-                    }
-                },
-                label = { Text("Password") },
-                visualTransformation = if (state.passwordVisibility) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
-                shape = RoundedCornerShape(20.dp),
-                singleLine = true,
-                trailingIcon = {
-                    val icon = if (state.passwordVisibility) {
-                        Icons.Outlined.VisibilityOff
-                    } else {
-                        Icons.Outlined.Visibility
-                    }
-                    IconButton(onClick = { onEvent(SignUpEvent.TogglePasswordVisibility) }) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = "Toggle password visibility"
-                        )
-                    }
-                },
-                isError = state.password.length < 6 && state.password.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            OutlinedTextField(
-                value = state.secondPassword,
-                onValueChange = { newPassword ->
-                    val passwordRegex = Regex("^[A-Za-z0-9,.?!@#\$]*\$")
-                    if (newPassword.matches(passwordRegex)) {
-                        onEvent(SignUpEvent.SecondPasswordChanged(newPassword))
-                    }
-                },
-                label = { Text("Confirm Password") },
-                visualTransformation = if (state.secondPasswordVisibility) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
-                shape = RoundedCornerShape(20.dp),
-                singleLine = true,
-                trailingIcon = {
-                    val icon = if (state.secondPasswordVisibility) {
-                        Icons.Outlined.VisibilityOff
-                    } else {
-                        Icons.Outlined.Visibility
-                    }
-                    IconButton(onClick = { onEvent(SignUpEvent.ToggleSecondPasswordVisibility) }) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = "Toggle second password visibility"
-                        )
-                    }
-                },
-                isError = state.secondPassword.isNotEmpty() && state.secondPassword.isNotEmpty() &&
-                        state.secondPassword != state.password,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Checkbox(
-                    checked = state.termsAccepted,
-                    onCheckedChange = { onEvent(SignUpEvent.TermsAcceptedChanged) }
-                )
-
-                val uriHandler = LocalUriHandler.current
-
-                val annotatedString = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
-                        append("By creating an account you agree to our ")
-                    }
-                    // To be changed to the actual link
-                    pushStringAnnotation(tag = "TERMS", annotation = "https://youtu.be/dQw4w9WgXcQ?si=Y0SKQcGW2wXSzNrq")
-                    withStyle(style = SpanStyle(
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
-                    )) {
-                        append("Terms and Conditions")
-                    }
-                    pop()
-                }
-
-                ClickableText(
-                    text = annotatedString,
-                    style = MaterialTheme.typography.labelSmall,
-                    onClick = { offset: Int ->
-                        annotatedString.getStringAnnotations(
-                            tag = "TERMS",
-                            start = offset,
-                            end = offset
-                        ).firstOrNull()?.let { annotation ->
-                            uriHandler.openUri(annotation.item)
-                        }
-                    },
-                )
-            }
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Button(
-                onClick = { onEvent(SignUpEvent.SignUpClicked) },
-                modifier = Modifier
+                    .height(53.dp)
                     .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(20.dp),
-                enabled = state.phoneNumber.length == 12 && state.password.length >= 6 &&
-                        state.secondPassword == state.password && state.termsAccepted && state.username.isNotEmpty()
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(
+                            topStart = 30.dp,
+                            topEnd = 30.dp
+                        )
+                    )
+                    .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
+                Spacer(modifier = Modifier.height(30.dp))
+
                 Text(
-                    text = "Sign Up",
-                    style = MaterialTheme.typography.bodyLarge
+                    text = "Welcome to us,",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier.align(Alignment.Start)
                 )
-            }
 
-            Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(6.dp))
 
-            Row(
-                modifier = Modifier.padding(bottom = 24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
                 Text(
-                    text = "Already have an account? ",
+                    text = "Hello there, create a New Account",
                     style = MaterialTheme.typography.labelSmall.copy(
                         color = MaterialTheme.colorScheme.secondary
-                    )
-                )
-                Text(
-                    text = "Sign In",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
                     ),
-                    modifier = Modifier.clickable { onEvent(SignUpEvent.OnLoginClick) }
+                    modifier = Modifier.align(Alignment.Start)
                 )
+
+                Spacer(modifier = Modifier.height(50.dp))
+
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "App Logo",
+                    modifier = Modifier
+                        .width(180.dp)
+                )
+
+                Spacer(modifier = Modifier.height(50.dp))
+
+                OutlinedTextField(
+                    value = state.username,
+                    onValueChange = { newUsername ->
+                        val usernameRegex = Regex("^[A-Za-z0-9.]*\$")
+                        if (newUsername.length <= 12 && newUsername.matches(usernameRegex)) {
+                            onEvent(SignUpEvent.UsernameChanged(newUsername))
+                        }
+                    },
+                    label = { Text("Username") },
+                    shape = RoundedCornerShape(20.dp),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                var phoneFieldValue by remember {
+                    mutableStateOf(
+                        TextFieldValue(
+                            text = state.phoneNumber,
+                            selection = TextRange(state.phoneNumber.length)
+                        )
+                    )
+                }
+
+                OutlinedTextField(
+                    value = phoneFieldValue,
+                    onValueChange = { newValue ->
+                        var phone = newValue.text
+
+                        if (phone.isNotEmpty() && !phone.startsWith("+")) {
+                            phone = "+$phone"
+                        }
+
+                        val phoneRegex = Regex("^\\+?\\d{0,11}$")
+                        if (!phone.matches(phoneRegex)) return@OutlinedTextField
+
+                        phoneFieldValue = TextFieldValue(
+                            text = phone,
+                            selection = TextRange(phone.length)
+                        )
+
+                        onEvent(SignUpEvent.PhoneNumberChanged(phone))
+                    },
+                    label = { Text("Phone Number") },
+                    shape = RoundedCornerShape(20.dp),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    isError = if (state.phoneNumber.isEmpty()) false else state.phoneNumber.length < 12,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                OutlinedTextField(
+                    value = state.password,
+                    onValueChange = { newPassword ->
+                        val passwordRegex = Regex("^[A-Za-z0-9,.?!@#\$]*\$")
+                        if (newPassword.matches(passwordRegex)) {
+                            onEvent(SignUpEvent.PasswordChanged(newPassword))
+                        }
+                    },
+                    label = { Text("Password") },
+                    visualTransformation = if (state.passwordVisibility) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
+                    shape = RoundedCornerShape(20.dp),
+                    singleLine = true,
+                    trailingIcon = {
+                        val icon = if (state.passwordVisibility) {
+                            Icons.Outlined.VisibilityOff
+                        } else {
+                            Icons.Outlined.Visibility
+                        }
+                        IconButton(onClick = { onEvent(SignUpEvent.TogglePasswordVisibility) }) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = "Toggle password visibility"
+                            )
+                        }
+                    },
+                    isError = state.password.length < 6 && state.password.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                OutlinedTextField(
+                    value = state.secondPassword,
+                    onValueChange = { newPassword ->
+                        val passwordRegex = Regex("^[A-Za-z0-9,.?!@#\$]*\$")
+                        if (newPassword.matches(passwordRegex)) {
+                            onEvent(SignUpEvent.SecondPasswordChanged(newPassword))
+                        }
+                    },
+                    label = { Text("Confirm Password") },
+                    visualTransformation = if (state.secondPasswordVisibility) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
+                    shape = RoundedCornerShape(20.dp),
+                    singleLine = true,
+                    trailingIcon = {
+                        val icon = if (state.secondPasswordVisibility) {
+                            Icons.Outlined.VisibilityOff
+                        } else {
+                            Icons.Outlined.Visibility
+                        }
+                        IconButton(onClick = { onEvent(SignUpEvent.ToggleSecondPasswordVisibility) }) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = "Toggle second password visibility"
+                            )
+                        }
+                    },
+                    isError = state.secondPassword.isNotEmpty() && state.secondPassword.isNotEmpty() &&
+                            state.secondPassword != state.password,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = state.termsAccepted,
+                        onCheckedChange = { onEvent(SignUpEvent.TermsAcceptedChanged) }
+                    )
+
+                    val uriHandler = LocalUriHandler.current
+
+                    val annotatedString = buildAnnotatedString {
+                        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
+                            append("By creating an account you agree to our ")
+                        }
+                        // To be changed to the actual link
+                        pushStringAnnotation(
+                            tag = "TERMS",
+                            annotation = "https://youtu.be/dQw4w9WgXcQ?si=Y0SKQcGW2wXSzNrq"
+                        )
+                        withStyle(
+                            style = SpanStyle(
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        ) {
+                            append("Terms and Conditions")
+                        }
+                        pop()
+                    }
+
+                    ClickableText(
+                        text = annotatedString,
+                        style = MaterialTheme.typography.labelSmall,
+                        onClick = { offset: Int ->
+                            annotatedString.getStringAnnotations(
+                                tag = "TERMS",
+                                start = offset,
+                                end = offset
+                            ).firstOrNull()?.let { annotation ->
+                                uriHandler.openUri(annotation.item)
+                            }
+                        },
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Button(
+                    onClick = { onEvent(SignUpEvent.SignUpClicked) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    enabled = state.phoneNumber.length == 12 && state.password.length >= 6 &&
+                            state.secondPassword == state.password && state.termsAccepted && state.username.isNotEmpty()
+                ) {
+                    Text(
+                        text = "Sign Up",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
+        }
+        Row(
+            modifier = Modifier.padding(bottom = 24.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Already have an account? ",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            )
+            Text(
+                text = "Sign In",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                modifier = Modifier.clickable { onEvent(SignUpEvent.OnLoginClick) }
+            )
         }
     }
 }

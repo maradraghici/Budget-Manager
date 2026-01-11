@@ -9,6 +9,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -93,20 +95,25 @@ private fun MainScreen(state: TopBarState, onEvent: (event: TopBarEvent) -> Unit
                             },
                             icon = {
                                 Row(
-                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    modifier = Modifier.padding(vertical = 5.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = route,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-
                                     if (isSelected) {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = route,
+                                            modifier = Modifier.size(30.dp)
+                                        )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
                                             text = route,
                                             style = MaterialTheme.typography.labelSmall
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = route,
+                                            modifier = Modifier.size(30.dp)
                                         )
                                     }
                                 }
@@ -134,6 +141,6 @@ private fun MainScreen(state: TopBarState, onEvent: (event: TopBarEvent) -> Unit
 }
 
 private val bottomNavItems = mapOf(
-    Routes.HOME to Icons.Default.Home,
-    Routes.SETTINGS to Icons.Default.Settings
+    Routes.HOME to Icons.Outlined.Home,
+    Routes.SETTINGS to Icons.Outlined.Settings
 )
