@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -32,38 +33,43 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.budgetmanager.R
-import com.example.budgetmanager.ui.screen.connections.ConnectionsEvent
-import com.example.budgetmanager.ui.screen.main.TopBarEvent
+import com.example.budgetmanager.ui.screen.main.MainEvent
 
 @Composable
 fun ProfileScreenDestination(
-    onTopBarEvent: (event: TopBarEvent) -> Unit,
+    onTitleChanged: (String) -> Unit,
+    navigateToAuth: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val vm: ProfileViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        onTopBarEvent(TopBarEvent.OnTitleChanged("My Profile"))
+        onTitleChanged("My Profile")
+    }
+
+    LaunchedEffect(Unit) {
+        vm.effect.collect {
+            when(it) {
+                ProfileEffect.OnSignOutClick -> {
+                    navigateToAuth()
+                }
+            }
+        }
     }
 
     ProfileScreen(state, vm::onEvent, modifier = modifier)
@@ -252,6 +258,23 @@ private fun ProfileScreen(
                 ) {
                     Text(
                         text = "Confirm",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                Button(
+                    onClick = { onEvent(ProfileEvent.OnSignOutClick) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .height(56.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors().copy(
+                        containerColor = MaterialTheme.colorScheme.inversePrimary
+                    )
+                ) {
+                    Text(
+                        text = "Sign Out",
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }

@@ -25,18 +25,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.budgetmanager.ui.components.ConfirmModalBottomSheet
 import com.example.budgetmanager.ui.components.DefaultModalBottomSheet
 import com.example.budgetmanager.ui.components.TextButton
-import com.example.budgetmanager.ui.screen.main.TopBarEvent
 
 @Composable
 fun ConnectionsScreenDestination(
-    onTopBarEvent: (event: TopBarEvent) -> Unit,
+    onTitleChanged: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val vm: ConnectionsViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        onTopBarEvent(TopBarEvent.OnTitleChanged("My Connections"))
+        onTitleChanged("My Connections")
     }
 
     ConnectionsScreen(state, vm::onEvent, modifier = modifier)

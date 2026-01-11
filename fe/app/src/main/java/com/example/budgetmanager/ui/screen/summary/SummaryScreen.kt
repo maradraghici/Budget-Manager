@@ -21,18 +21,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.budgetmanager.ui.screen.main.TopBarEvent
+import com.example.budgetmanager.ui.screen.main.MainEvent
 
 @Composable
 fun SummaryScreenDestination(
-    onTopBarEvent: (event: TopBarEvent) -> Unit,
+    onTitleChanged: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val vm: SummaryViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        onTopBarEvent(TopBarEvent.OnTitleChanged("Summary"))
+        onTitleChanged("Summary")
     }
 
     SummaryScreen(state, modifier)

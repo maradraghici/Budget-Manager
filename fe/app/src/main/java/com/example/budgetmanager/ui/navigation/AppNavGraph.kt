@@ -11,7 +11,7 @@ import androidx.navigation.navArgument
 import com.example.budgetmanager.ui.screen.budgetdetails.BudgetDetailsScreenDestination
 import com.example.budgetmanager.ui.screen.connections.ConnectionsScreenDestination
 import com.example.budgetmanager.ui.screen.home.HomeScreenDestination
-import com.example.budgetmanager.ui.screen.main.TopBarEvent
+import com.example.budgetmanager.ui.screen.main.MainEvent
 import com.example.budgetmanager.ui.screen.profile.ProfileScreenDestination
 import com.example.budgetmanager.ui.screen.settings.SettingsScreenDestination
 import com.example.budgetmanager.ui.screen.summary.SummaryScreenDestination
@@ -21,7 +21,7 @@ fun AppNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     startDestination: String = Routes.HOME,
-    onTopBarEvent: (event: TopBarEvent) -> Unit
+    onEvent: (event: MainEvent) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -53,7 +53,7 @@ fun AppNavGraph(
             arguments = listOf(navArgument("id") { type = NavType.LongType })
         ) {
             BudgetDetailsScreenDestination(
-                onTopBarEvent = onTopBarEvent,
+                onTitleChanged = { onEvent(MainEvent.OnTitleChanged(it)) },
                 navigateToSummary = { id ->
                     navController.navigate(Routes.summary(id))
                 },
@@ -66,21 +66,22 @@ fun AppNavGraph(
             arguments = listOf(navArgument("id") { type = NavType.LongType })
         ){
             SummaryScreenDestination(
-                onTopBarEvent = onTopBarEvent,
+                onTitleChanged = { onEvent(MainEvent.OnTitleChanged(it)) },
                 modifier = modifier
             )
         }
 
         composable(Routes.CONNECTIONS) {
             ConnectionsScreenDestination(
-                onTopBarEvent = onTopBarEvent,
+                onTitleChanged = { onEvent(MainEvent.OnTitleChanged(it)) },
                 modifier = modifier
             )
         }
 
         composable(Routes.PROFILE) {
             ProfileScreenDestination(
-                onTopBarEvent = onTopBarEvent,
+                onTitleChanged = { onEvent(MainEvent.OnTitleChanged(it)) },
+                navigateToAuth = { onEvent(MainEvent.OnSignOutClick) },
                 modifier = modifier
             )
         }

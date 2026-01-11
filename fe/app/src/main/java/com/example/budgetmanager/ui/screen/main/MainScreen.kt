@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -37,15 +36,25 @@ import com.example.budgetmanager.ui.navigation.Routes
 
 @Composable
 fun MainScreenDestination(navigateToAuth: () -> Unit) {
-    val vm: TopBarViewModel = hiltViewModel()
+    val vm: MainViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        vm.effect.collect {
+            when(it) {
+                MainEffect.OnSignOutClick -> {
+                    navigateToAuth()
+                }
+            }
+        }
+    }
 
     MainScreen(state, vm::onEvent)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MainScreen(state: TopBarState, onEvent: (event: TopBarEvent) -> Unit) {
+private fun MainScreen(state: MainState, onEvent: (event: MainEvent) -> Unit) {
     val appNavController = rememberNavController()
     val navBackStackEntry by appNavController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -134,7 +143,7 @@ private fun MainScreen(state: TopBarState, onEvent: (event: TopBarEvent) -> Unit
     ) { innerPadding ->
         AppNavGraph(
             navController = appNavController,
-            onTopBarEvent = onEvent,
+            onEvent = onEvent,
             modifier = Modifier.padding(innerPadding)
         )
     }

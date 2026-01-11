@@ -9,7 +9,9 @@ import com.example.budgetmanager.data.local.User
 import com.example.budgetmanager.data.local.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -36,6 +38,11 @@ sealed interface ProfileEvent {
     data object ToggleSecondPasswordVisibility : ProfileEvent
     data class ProfileImageChanged(val uri: Uri?) : ProfileEvent
     data object OnConfirmClick : ProfileEvent
+    data object OnSignOutClick : ProfileEvent
+}
+
+sealed interface ProfileEffect {
+    data object OnSignOutClick : ProfileEffect
 }
 
 @HiltViewModel
@@ -44,6 +51,9 @@ class ProfileViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(ProfileState())
     val state = _state.asStateFlow()
+
+    private val _effect = MutableSharedFlow<ProfileEffect>()
+    val effect = _effect.asSharedFlow()
 
     fun onEvent(event: ProfileEvent) {
         when (event) {
@@ -78,6 +88,15 @@ class ProfileViewModel @Inject constructor(
             }
             is ProfileEvent.OnConfirmClick -> {
                 // Call backend to update user
+            }
+
+            ProfileEvent.OnSignOutClick -> viewModelScope.launch {
+                UserPreferences.clearUserId(context)
+                UserPreferences.clearProfileImagePath(context)
+
+                // Call backend to sign out user and delete token
+
+                _effect.emit(ProfileEffect.OnSignOutClick)
             }
         }
     }

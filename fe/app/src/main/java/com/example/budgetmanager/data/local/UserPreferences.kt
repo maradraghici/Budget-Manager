@@ -44,4 +44,10 @@ object UserPreferences {
             preferences[PreferenceKeys.PROFILE_IMAGE_PATH_KEY] = path
         }
     }
+
+    suspend fun clearProfileImagePath(context: Context) {
+        context.dataStore.edit { prefs ->
+            prefs.remove(PreferenceKeys.PROFILE_IMAGE_PATH_KEY)
+        }
+    }
 }

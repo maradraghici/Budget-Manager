@@ -33,12 +33,12 @@ import com.example.budgetmanager.ui.components.ConfirmModalBottomSheet
 import com.example.budgetmanager.ui.components.DefaultModalBottomSheet
 import com.example.budgetmanager.ui.components.ExpenseCard
 import com.example.budgetmanager.ui.components.OptionsModalBottomSheet
-import com.example.budgetmanager.ui.screen.main.TopBarEvent
+import com.example.budgetmanager.ui.screen.main.MainEvent
 
 @Composable
 fun BudgetDetailsScreenDestination(
     modifier: Modifier = Modifier,
-    onTopBarEvent: (event: TopBarEvent) -> Unit,
+    onTitleChanged: (String) -> Unit,
     navigateToSummary: (Long) -> Unit
 ) {
     val vm: BudgetDetailsViewModel = hiltViewModel()
@@ -54,7 +54,7 @@ fun BudgetDetailsScreenDestination(
 
     LaunchedEffect(state.budgetDetails?.title) {
         state.budgetDetails?.let {
-            onTopBarEvent(TopBarEvent.OnTitleChanged(it.title))
+            onTitleChanged(it.title)
         }
     }
 
