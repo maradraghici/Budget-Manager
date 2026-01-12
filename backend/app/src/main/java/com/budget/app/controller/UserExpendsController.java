@@ -1,7 +1,7 @@
 package com.budget.app.controller;
 
-import com.budget.app.model.UserExpends;
 import com.budget.app.services.UserExpendsService;
+import com.budget.app.vo.UserExpendsResponseVo;
 import com.budget.app.vo.UserExpendsVo;
 
 import java.util.List;
@@ -9,7 +9,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
 
 
 @RestController
@@ -19,8 +18,8 @@ public class UserExpendsController {
 
     @GetMapping("/userexpends/user/{userId}")
     @CrossOrigin
-    public ResponseEntity<List<UserExpends>> getUserExpendsByUserId(@PathVariable Long userId) {
-        List<UserExpends> userExpends = userExpendsService.getUserExpendsByUserId(userId);
+    public ResponseEntity<List<UserExpendsResponseVo>> getUserExpendsByUserId(@PathVariable Long userId) {
+        List<UserExpendsResponseVo> userExpends = userExpendsService.getUserExpendsByUserId(userId);
         if (userExpends != null && !userExpends.isEmpty()) {
             return ResponseEntity.ok(userExpends);
         } else {
@@ -29,8 +28,8 @@ public class UserExpendsController {
     }
 
     @GetMapping("/userexpends/expends/{expendsId}")
-    public ResponseEntity<List<UserExpends>> getUserExpendsByExpendsId(@PathVariable Long expendsId) {
-        List<UserExpends> userExpends = userExpendsService.getUserExpendsByExpendsId(expendsId);
+    public ResponseEntity<List<UserExpendsResponseVo>> getUserExpendsByExpendsId(@PathVariable Long expendsId) {
+        List<UserExpendsResponseVo> userExpends = userExpendsService.getUserExpendsByExpendsId(expendsId);
         if (userExpends != null && !userExpends.isEmpty()) {
             return ResponseEntity.ok(userExpends);
         } else {
@@ -39,8 +38,8 @@ public class UserExpendsController {
     }
 
     @GetMapping("/userexpends/find/{userExpendsId}")
-    public ResponseEntity<UserExpends> getUserExpendsById(@PathVariable Long userExpendsId) {
-        UserExpends userExpends = userExpendsService.getUserExpendsById(userExpendsId);
+    public ResponseEntity<UserExpendsResponseVo> getUserExpendsById(@PathVariable Long userExpendsId) {
+        UserExpendsResponseVo userExpends = userExpendsService.getUserExpendsById(userExpendsId);
         if (userExpends != null) {
             return ResponseEntity.ok(userExpends);
         } else {

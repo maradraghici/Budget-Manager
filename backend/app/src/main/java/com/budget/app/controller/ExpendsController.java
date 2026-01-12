@@ -1,7 +1,7 @@
 package com.budget.app.controller;
 
-import com.budget.app.model.Expends;
 import com.budget.app.services.ExpendsService;
+import com.budget.app.vo.ExpendsResponseVo;
 import com.budget.app.vo.ExpendsVo;
 
 import java.util.List;
@@ -21,8 +21,8 @@ public class ExpendsController {
 
     @GetMapping("/expends/{expendsId}")
     @CrossOrigin
-    public ResponseEntity<Expends> getExpendsById(@PathVariable Long expendsId) {
-        Expends expends = expendsService.getExpendsById(expendsId);
+    public ResponseEntity<ExpendsResponseVo> getExpendsById(@PathVariable Long expendsId) {
+        ExpendsResponseVo expends = expendsService.getExpendsById(expendsId);
         if (expends != null) {
             return ResponseEntity.ok(expends);
         } else {
@@ -36,10 +36,8 @@ public class ExpendsController {
     }
 
     @GetMapping("/expends/budget/{budgetId}")
-    public ResponseEntity<List<Expends>> getExpendsBudget(@PathVariable Long budgetId) {
-        List<Expends> expends = expendsService.getExpendsByBudgetId(budgetId);
+    public ResponseEntity<List<ExpendsResponseVo>> getExpendsBudget(@PathVariable Long budgetId) {
+        List<ExpendsResponseVo> expends = expendsService.getExpendsByBudgetId(budgetId);
         return ResponseEntity.ok(expends);
     }
-    
-    
 }

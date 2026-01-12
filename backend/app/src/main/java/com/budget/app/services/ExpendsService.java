@@ -6,7 +6,10 @@ import com.budget.app.model.Budget;
 import com.budget.app.repository.ExpendsRepository;
 import com.budget.app.repository.UserRepository;
 import com.budget.app.repository.BudgetRepository;
+import com.budget.app.vo.BudgetSimpleVo;
+import com.budget.app.vo.ExpendsResponseVo;
 import com.budget.app.vo.ExpendsVo;
+import com.budget.app.vo.UserVo;
 
 import java.util.List;
 
@@ -51,11 +54,49 @@ public class ExpendsService {
         return expendsRepository.save(expends);
     }
 
-    public Expends getExpendsById(Long expendsId) {
-        return expendsRepository.findByExpendsId(expendsId);
+    public ExpendsResponseVo getExpendsById(Long expendsId) {
+        Expends expends = expendsRepository.findByExpendsId(expendsId);
+
+        if (expends == null) {
+            throw new IllegalArgumentException("Expends not found: " + expendsId);
+        }
+
+        return toResponseVo(expends);
     }
 
-    public List<Expends> getExpendsByBudgetId(Long budgetId) {
-        return expendsRepository.findByBudget_BudgetId(budgetId);
+    public List<ExpendsResponseVo> getExpendsByBudgetId(Long budgetId) {
+        return expendsRepository.findByBudget_BudgetId(budgetId)
+                .stream()
+                .map(this::toResponseVo)
+                .toList();
+    }
+
+    // =========================
+    // 🔁 Mapper interne
+    // =========================
+    private ExpendsResponseVo toResponseVo(Expends expends) {
+
+        return ExpendsResponseVo.builder()
+                .expendsId(expends.getExpendsId())
+                .expendsName(expends.getExpendsName())
+                .commentary(expends.getCommentary())
+                .amount(expends.getAmount())
+                .createdAt(expends.getCreatedAt())
+                .updatedAt(expends.getUpdatedAt())
+                .paidBy(
+                        UserVo.builder()
+                                .userId(expends.getUser().getUserId())
+                                .userName(expends.getUser().getUserName())
+                                .email(expends.getUser().getEmail())
+                                .phoneNumber(expends.getUser().getPhoneNumber())
+                                .build()
+                )
+                .budget(
+                        BudgetSimpleVo.builder()
+                                .budgetId(expends.getBudget().getBudgetId())
+                                .budgetName(expends.getBudget().getBudgetName())
+                                .build()
+                )
+                .build();
     }
 }

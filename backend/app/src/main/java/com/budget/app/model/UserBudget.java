@@ -12,7 +12,12 @@ import jakarta.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user_budget_table")
+@Table(
+    name = "user_budget_table",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "budget_id"})
+    }
+)
 public class UserBudget {
 
     @Id

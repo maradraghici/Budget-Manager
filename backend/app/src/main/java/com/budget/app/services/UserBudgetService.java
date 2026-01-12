@@ -6,7 +6,10 @@ import com.budget.app.model.User;
 import com.budget.app.repository.UserBudgetRepository;
 import com.budget.app.repository.BudgetRepository;
 import com.budget.app.repository.UserRepository;
+import com.budget.app.vo.BudgetSimpleVo;
+import com.budget.app.vo.UserBudgetResponseVo;
 import com.budget.app.vo.UserBudgetVo;
+import com.budget.app.vo.UserVo;
 
 import java.util.List;
 
@@ -24,16 +27,26 @@ public class UserBudgetService {
         this.userRepository = userRepository;
     }
 
-    public List<UserBudget> getUserBudgetByUserId(Long userId) {
-        return userBudgetRepository.findByUserId_UserId(userId);
+    public List<UserBudgetResponseVo> getUserBudgetByUserId(Long userId) {
+        return userBudgetRepository.findByUserId_UserId(userId)
+                .stream()
+                .map(this::toResponseVo)
+                .toList();
     }
 
-    public UserBudget getUserBudgetById(Long userBudgetId) {
-        return userBudgetRepository.findByUserBudgetId(userBudgetId);
+    public UserBudgetResponseVo getUserBudgetById(Long userBudgetId) {
+        UserBudget ub = userBudgetRepository.findByUserBudgetId(userBudgetId);
+        if (ub == null) {
+            throw new IllegalArgumentException("UserBudget not found: " + userBudgetId);
+        }
+        return toResponseVo(ub);
     }
 
-    public List<UserBudget> getUserBudgetByBudgetId(Long budgetId) {
-        return userBudgetRepository.findByBudgetId_BudgetId(budgetId);
+    public List<UserBudgetResponseVo> getUserBudgetByBudgetId(Long budgetId) {
+        return userBudgetRepository.findByBudgetId_BudgetId(budgetId)
+                .stream()
+                .map(this::toResponseVo)
+                .toList();
     }
 
     public UserBudget createUserBudget(UserBudgetVo userBudget) {
@@ -60,5 +73,25 @@ public class UserBudgetService {
 
     public void deleteUserBudget(Long userBudgetId) {
         userBudgetRepository.deleteById(userBudgetId);
+    }
+
+    private UserBudgetResponseVo toResponseVo(UserBudget ub) {
+        return UserBudgetResponseVo.builder()
+                .userBudgetId(ub.getUserBudgetId())
+                .user(
+                        UserVo.builder()
+                                .userId(ub.getUserId().getUserId())
+                                .userName(ub.getUserId().getUserName())
+                                .email(ub.getUserId().getEmail())
+                                .phoneNumber(ub.getUserId().getPhoneNumber())
+                                .build()
+                )
+                .budget(
+                        BudgetSimpleVo.builder()
+                                .budgetId(ub.getBudgetId().getBudgetId())
+                                .budgetName(ub.getBudgetId().getBudgetName())
+                                .build()
+                )
+                .build();
     }
 }

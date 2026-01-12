@@ -6,7 +6,10 @@ import com.budget.app.repository.UserExpendsRepository;
 import com.budget.app.model.Expends;
 import com.budget.app.repository.ExpendsRepository;
 import com.budget.app.repository.UserRepository;
+import com.budget.app.vo.ExpendsSimpleVo;
+import com.budget.app.vo.UserExpendsResponseVo;
 import com.budget.app.vo.UserExpendsVo;
+import com.budget.app.vo.UserVo;
 
 import java.util.List;
 
@@ -24,16 +27,26 @@ public class UserExpendsService {
         this.userRepository = userRepository;
     }
 
-    public List<UserExpends> getUserExpendsByUserId(Long userId) {
-        return userExpendsRepository.findByUserId_UserId(userId);
+    public List<UserExpendsResponseVo> getUserExpendsByUserId(Long userId) {
+        return userExpendsRepository.findByUserId_UserId(userId)
+                .stream()
+                .map(this::toResponseVo)
+                .toList();
     }
 
-    public UserExpends getUserExpendsById(Long userExpendsId) {
-        return userExpendsRepository.findByUserExpendsId(userExpendsId);
+    public UserExpendsResponseVo getUserExpendsById(Long userExpendsId) {
+        UserExpends uE = userExpendsRepository.findByUserExpendsId(userExpendsId);
+        if (uE == null) {
+            throw new IllegalArgumentException("UserExpends not found: " + userExpendsId);
+        }
+        return toResponseVo(uE);
     }
 
-    public List<UserExpends> getUserExpendsByExpendsId(Long expendsId) {
-        return userExpendsRepository.findByExpendsId_ExpendsId(expendsId);
+    public List<UserExpendsResponseVo> getUserExpendsByExpendsId(Long expendsId) {
+        return userExpendsRepository.findByExpendsId_ExpendsId(expendsId)
+                .stream()
+                .map(this::toResponseVo)
+                .toList();
     }
 
     public UserExpends createUserExpends(UserExpendsVo userExpendsVo) {
@@ -56,5 +69,26 @@ public class UserExpendsService {
                 .build();
 
         return userExpendsRepository.save(newUserExpends);
+    }
+
+    private UserExpendsResponseVo toResponseVo(UserExpends ue) {
+        return UserExpendsResponseVo.builder()
+                .userExpendsId(ue.getUserExpendsId())
+                .user(
+                        UserVo.builder()
+                                .userId(ue.getUserId().getUserId())
+                                .userName(ue.getUserId().getUserName())
+                                .email(ue.getUserId().getEmail())
+                                .phoneNumber(ue.getUserId().getPhoneNumber())
+                                .build()
+                )
+                .expends(
+                        ExpendsSimpleVo.builder()
+                                .expendsId(ue.getExpendsId().getExpendsId())
+                                .expendsName(ue.getExpendsId().getExpendsName())
+                                .amount(ue.getExpendsId().getAmount())
+                                .build()
+                )
+                .build();
     }
 }

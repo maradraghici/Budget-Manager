@@ -12,7 +12,12 @@ import jakarta.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user_expends_table")
+@Table(
+    name = "user_expends_table",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "expends_id"})
+    }
+)
 public class UserExpends {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
