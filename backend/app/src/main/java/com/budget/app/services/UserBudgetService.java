@@ -72,7 +72,12 @@ public class UserBudgetService {
     }
 
     public void deleteUserBudget(Long userBudgetId) {
-        userBudgetRepository.deleteById(userBudgetId);
+        if (userBudgetRepository.existsById(userBudgetId)){
+            userBudgetRepository.deleteById(userBudgetId);
+        } else {
+            throw new IllegalArgumentException("User expends link not found: " + userBudgetId);
+        }
+        
     }
 
     private UserBudgetResponseVo toResponseVo(UserBudget ub) {

@@ -51,4 +51,9 @@ public class UserExpendsController {
     public void createUserExpends(@RequestBody UserExpendsVo userExpends) {
         userExpendsService.createUserExpends(userExpends);
     }
+
+    @DeleteMapping("userexpends/delete/{userExpendsId}")
+    public void deleteUserExpends(@PathVariable Long userExpendsId ){
+        userExpendsService.deleteUserExpends(userExpendsId);
+    }
 }

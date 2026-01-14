@@ -30,6 +30,9 @@ CREATE TABLE user_budget_table (
     budget_id INTEGER REFERENCES budget_table(budget_id)
 );
 
+alter table user_budget_table 
+add constraint uq_user_budget unique (user_id, budget_id)
+
 CREATE TABLE expends_table (
     expends_id SERIAL PRIMARY KEY,
     expends_name VARCHAR(255),
@@ -46,6 +49,9 @@ CREATE TABLE user_expends_table (
     user_id INTEGER REFERENCES user_table(user_id),
     expends_id INTEGER REFERENCES expends_table(expends_id)
 );
+
+alter table user_expends_table 
+add constraint uq_user_expends unique (user_id, expends_id)
 
 INSERT INTO user_table (user_name , email , password)
 VALUES ('test', 'test@gmail.com', 'testPassword');

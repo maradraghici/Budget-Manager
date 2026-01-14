@@ -71,6 +71,14 @@ public class UserExpendsService {
         return userExpendsRepository.save(newUserExpends);
     }
 
+    public void deleteUserExpends(Long userExpendsId){
+        if (userExpendsRepository.existsById(userExpendsId)){
+            userExpendsRepository.deleteById(userExpendsId);
+        } else {
+            throw new IllegalArgumentException("User expends link not found: " + userExpendsId);
+        }
+    }
+
     private UserExpendsResponseVo toResponseVo(UserExpends ue) {
         return UserExpendsResponseVo.builder()
                 .userExpendsId(ue.getUserExpendsId())
