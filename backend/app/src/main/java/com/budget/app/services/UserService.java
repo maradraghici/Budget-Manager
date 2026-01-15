@@ -10,8 +10,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -73,7 +71,7 @@ public class UserService {
                 bCryptPasswordEncoder.matches(userRequestVo.getPassword(),
                 user.getPassword())) {
             //String token=  RandomStringUtils.random(25, true, true);
-            String token = createJsonWebToken(userRequestVo.getUsername());
+            String token = createJsonWebToken(user.getUserId());
             UserLogin userLogin = UserLogin.builder()
                     .user(user)
                     .token(token)
@@ -90,30 +88,23 @@ public class UserService {
         }
     }
 
-    public UserAuthorizeResponseVo authorizeV1(UserRequestVo userRequestVo) throws ParseException {
-        UserLogin userLogin = userLoginRepository.findByUserAndToken(userRequestVo.getUsername(),
-                userRequestVo.getToken());
-        if (userLogin != null) {
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date date = format.parse(userLogin.getTokenExpireTime());
+    public UserAuthorizeResponseVo authorizeV2(UserRequestVo userRequestVo) {
+        try {
+            Long userId = extractUserIdFromToken(userRequestVo.getToken());
 
-            if (new Date().compareTo(date) < 1) {
-                return new UserAuthorizeResponseVo(userRequestVo.getUsername(), true);
-            } else {
-                return new UserAuthorizeResponseVo(userRequestVo.getUsername(), false);
+            UserLogin userLogin = userLoginRepository
+                    .findByUser_UserIdAndToken(userId, userRequestVo.getToken());
+
+            if (userLogin != null) {
+                return new UserAuthorizeResponseVo(
+                    userId, 
+                    verifyToken(userRequestVo.getToken()));
             }
-        }
-        return new UserAuthorizeResponseVo(userRequestVo.getUsername(), false);
-    }
 
-    public UserAuthorizeResponseVo authorizeV2(UserRequestVo userRequestVo) throws ParseException {
-        String userName = extractUserNameFromToken(userRequestVo.getToken());
-        UserLogin userLogin = userLoginRepository.findByUserAndToken(userName, userRequestVo.getToken());
-        if (userLogin != null) {
-            return new UserAuthorizeResponseVo(userRequestVo.getUsername(),
-                    verifyToken(userRequestVo.getUsername(), userRequestVo.getToken()));
+            return new UserAuthorizeResponseVo(userId, false);
+        } catch (JWTVerificationException e) {
+            return new UserAuthorizeResponseVo(null, false);
         }
-        return new UserAuthorizeResponseVo(userRequestVo.getUsername(), false);
     }
 
 
@@ -122,9 +113,9 @@ public class UserService {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(newDate);
     }
 
-    public static String createJsonWebToken(String username) {
+    public static String createJsonWebToken(Long userId) {
         return JWT.create()
-                .withSubject(username)
+                .withSubject(String.valueOf(userId))
                 .withIssuer("auth0")
                 .withExpiresAt(DateUtils.addHours(new Date(), 3))
                 .sign(Algorithm.HMAC256("secret"));
@@ -141,7 +132,17 @@ public class UserService {
 
     }
 
-    public static boolean verifyToken(String user, String token) {
+    public static Long extractUserIdFromToken(String token) {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        JWTVerifier verifier = JWT.require(algorithm)
+                .withIssuer("auth0")
+                .build();
+
+        DecodedJWT jwt = verifier.verify(token);
+        return Long.valueOf(jwt.getSubject());
+    }
+
+    public static boolean verifyToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256("secret");
             JWTVerifier verifier = JWT.require(algorithm)
