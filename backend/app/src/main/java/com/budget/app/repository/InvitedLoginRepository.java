@@ -11,5 +11,9 @@ public interface InvitedLoginRepository extends JpaRepository<InvitedLogin, Long
 
     @Query("SELECT i FROM InvitedLogin i WHERE i.invited.invitedName = ?1  and i.token = ?2")
     public InvitedLogin findByInvitedAndToken(String invitedName, String token);
+
+    InvitedLogin findByInvited_InvitedIdAndToken(Long invitedId, String token);
+
+    InvitedLogin findByInvited_InvitedId(Long invitedId);
 }
 

@@ -1,4 +1,5 @@
 package com.budget.app.vo;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InvitedAuthorizeResponseVo {
-    private Long invitedId;
-    private boolean authorized;
+public class UserUpdateVo {
+    private String username;
+    private String phoneNumber;
+
+    // sécurité password
+    private String oldPassword;
+    private String newPassword;
 }

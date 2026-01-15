@@ -13,6 +13,7 @@ import com.budget.app.vo.InvitedAuthorizeResponseVo;
 import com.budget.app.vo.InvitedRequestVo;
 import com.budget.app.vo.InvitedResponseVo;
 import com.budget.app.vo.InvitedTokenResponseVo;
+import com.budget.app.vo.InvitedUpdatePhoneVo;
 import com.budget.app.vo.InvitedVo;
 
 import java.text.SimpleDateFormat;
@@ -82,7 +83,7 @@ public class InvitedService {
 
         if (invited != null) {
 
-            String token = createJsonWebToken(invited.getInvitedName());
+            String token = createJsonWebToken(invited.getInvitedId());
 
             InvitedLogin invitedLogin = InvitedLogin.builder()
                     .invited(invited)
@@ -90,6 +91,10 @@ public class InvitedService {
                     .tokenExpireTime(getCurrentTimeStamp())
                     .build();
 
+            InvitedLogin last_InvitedLogin = invitedLoginRepository.findByInvited_InvitedId(invited.getInvitedId());
+            if (last_InvitedLogin != null){
+                invitedLoginRepository.deleteById(last_InvitedLogin.getInvitedLoginId());
+            }
             invitedLoginRepository.save(invitedLogin);
 
             return InvitedTokenResponseVo.builder()
@@ -102,21 +107,53 @@ public class InvitedService {
         }
     }
 
+    public void updatePhoneNumber(String bearerToken, InvitedUpdatePhoneVo vo) {
+
+        // 1. Nettoyage du Bearer
+        String token = bearerToken.replace("Bearer ", "");
+
+        // 2. Extraction sécurisée de l'ID depuis le JWT
+        Long invitedId = extractInvitedIdFromToken(token);
+
+        // 3. Vérification token
+        if (!verifyToken(token)) {
+            throw new RuntimeException("Invalid or expired token");
+        }
+
+        // 4. Récupération de l'invité
+        Invited invited = invitedRepository.findByInvitedId(invitedId);
+        if (invited == null) {
+            throw new RuntimeException("Invited not found");
+        }
+
+        // 5. Mise à jour
+        invited.setPhoneNumber(vo.getPhoneNumber());
+
+        invitedRepository.save(invited);
+    }
+
 
     public InvitedAuthorizeResponseVo authorizeV2(InvitedRequestVo requestVo) {
 
-        String invitedId = extractInvitedIdFromToken(requestVo.getToken());
+        try {
+            Long invitedId = extractInvitedIdFromToken(requestVo.getToken());
 
-        InvitedLogin invitedLogin =
-                invitedLoginRepository.findByInvitedAndToken(invitedId, requestVo.getToken());
+            InvitedLogin invitedLogin =
+                    invitedLoginRepository
+                            .findByInvited_InvitedIdAndToken(invitedId, requestVo.getToken());
 
-        if (invitedLogin != null) {
-            return new InvitedAuthorizeResponseVo(
-                    invitedId,
-                    verifyToken(invitedId, requestVo.getToken())
-            );
+            if (invitedLogin != null) {
+                return new InvitedAuthorizeResponseVo(
+                        invitedId,
+                        verifyToken(requestVo.getToken())
+                );
+            }
+
+            return new InvitedAuthorizeResponseVo(invitedId, false);
+
+        } catch (JWTVerificationException e) {
+            return new InvitedAuthorizeResponseVo(null, false);
         }
-        return new InvitedAuthorizeResponseVo(invitedId, false);
     }
 
 
@@ -125,38 +162,34 @@ public class InvitedService {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(newDate);
     }
 
-    public static String createJsonWebToken(String username) {
+    public static String createJsonWebToken(Long invitedId) {
         return JWT.create()
-                .withSubject(username)
+                .withSubject(String.valueOf(invitedId))
                 .withIssuer("auth0")
                 .withExpiresAt(DateUtils.addHours(new Date(), 3))
                 .sign(Algorithm.HMAC256("secret"));
     }
 
-    public static String extractInvitedIdFromToken(String token) throws JWTVerificationException {
-
+    public static Long extractInvitedIdFromToken(String token) {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         JWTVerifier verifier = JWT.require(algorithm)
                 .withIssuer("auth0")
                 .build();
-        DecodedJWT jwt = verifier.verify(token);
-        return jwt.getSubject();
 
+        DecodedJWT jwt = verifier.verify(token);
+        return Long.valueOf(jwt.getSubject());
     }
 
-    public static boolean verifyToken(String user, String token) {
+    public static boolean verifyToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256("secret");
             JWTVerifier verifier = JWT.require(algorithm)
                     .withIssuer("auth0")
                     .build();
-            DecodedJWT jwt = verifier.verify(token);
-            Date dateTheTokenWillExpire = jwt.getExpiresAt();
-            if (new Date().compareTo(dateTheTokenWillExpire) < 1) {
-                return true;
-            } else {
-                return false;
-            }
+
+            verifier.verify(token); // expiration vérifiée ici
+            return true;
+
         } catch (JWTVerificationException exception) {
             return false;
         }

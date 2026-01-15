@@ -9,6 +9,7 @@ import com.budget.app.vo.InvitedAuthorizeResponseVo;
 import com.budget.app.vo.InvitedRequestVo;
 import com.budget.app.vo.InvitedResponseVo;
 import com.budget.app.vo.InvitedTokenResponseVo;
+import com.budget.app.vo.InvitedUpdatePhoneVo;
 import com.budget.app.vo.InvitedVo;
 
 @RestController
@@ -46,6 +47,15 @@ public class InvitedController {
     @CrossOrigin
     public InvitedAuthorizeResponseVo authorize(@RequestBody InvitedRequestVo userRequestVo) throws ParseException {
         return service.authorizeV2(userRequestVo);
+    }
+
+    @PostMapping("/invited/updatePhone")
+    @CrossOrigin
+    public void updatePhoneNumber(
+            @RequestHeader("Authorization") String authorization,
+            @RequestBody InvitedUpdatePhoneVo vo
+    ) {
+        service.updatePhoneNumber(authorization, vo);
     }
 }
 

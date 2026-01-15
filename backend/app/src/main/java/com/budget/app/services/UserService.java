@@ -21,6 +21,7 @@ import com.budget.app.model.UserLogin;
 import com.budget.app.model.User;
 import com.budget.app.vo.UserRequestVo;
 import com.budget.app.vo.UserTokenResponseVo;
+import com.budget.app.vo.UserUpdateVo;
 import com.budget.app.vo.UserAuthorizeResponseVo;
 
 @Service
@@ -77,6 +78,10 @@ public class UserService {
                     .token(token)
                     .tokenExpireTime(getCurrentTimeStamp())
                     .build();
+            UserLogin last_userLogin = userLoginRepository.findByUser_UserId(user.getUserId());
+            if (last_userLogin != null){
+                userLoginRepository.deleteById(last_userLogin.getUserLoginId());
+            }
             userLoginRepository.save(userLogin);
             UserTokenResponseVo userTokenResponseVo = new UserTokenResponseVo();
             userTokenResponseVo.setToken(token);
@@ -105,6 +110,50 @@ public class UserService {
         } catch (JWTVerificationException e) {
             return new UserAuthorizeResponseVo(null, false);
         }
+    }
+
+    public void updateUser(String token, UserUpdateVo vo) {
+        // 1️⃣ Vérification + extraction userId
+        Long userId;
+        try {
+            userId = extractUserIdFromToken(token);
+        } catch (JWTVerificationException e) {
+            throw new RuntimeException("Invalid token");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 2️⃣ Update username
+        if (vo.getUsername() != null && !vo.getUsername().isBlank()) {
+            user.setUserName(vo.getUsername());
+        }
+
+        // 3️⃣ Update phone
+        if (vo.getPhoneNumber() != null && !vo.getPhoneNumber().isBlank()) {
+            user.setPhoneNumber(vo.getPhoneNumber());
+        }
+
+        // 4️⃣ Update password (SECURISÉ)
+        if (vo.getNewPassword() != null && !vo.getNewPassword().isBlank()) {
+
+            if (vo.getOldPassword() == null || vo.getOldPassword().isBlank()) {
+                throw new IllegalArgumentException("Old password is required");
+            }
+
+            if (!bCryptPasswordEncoder.matches(vo.getOldPassword(), user.getPassword())) {
+                throw new IllegalArgumentException("Old password is incorrect");
+            }
+
+            user.setPassword(
+                    bCryptPasswordEncoder.encode(vo.getNewPassword())
+            );
+
+            // Optionnel mais recommandé : invalider les anciens tokens
+            // userLoginRepository.deleteByUser_UserId(userId);
+        }
+
+        userRepository.save(user);
     }
 
 
