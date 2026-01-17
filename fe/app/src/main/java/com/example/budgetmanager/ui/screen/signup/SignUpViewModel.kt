@@ -1,12 +1,19 @@
 package com.example.budgetmanager.ui.screen.signup
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.budgetmanager.data.local.UserPreferences
+import com.example.budgetmanager.data.remote.dto.RegisterRequest
+import com.example.budgetmanager.data.repository.AuthRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SignUpState(
     val username: String = "",
@@ -37,7 +44,11 @@ sealed interface SignUpEffect {
     data object OnLoginClick : SignUpEffect
 }
 
-class SignUpViewModel : ViewModel() {
+@HiltViewModel
+class SignUpViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val authRepository: AuthRepository
+) : ViewModel() {
     private val _state = MutableStateFlow(SignUpState())
     val state = _state.asStateFlow()
 
@@ -68,11 +79,28 @@ class SignUpViewModel : ViewModel() {
                 _state.value = _state.value.copy(termsAccepted = !_state.value.termsAccepted)
             }
             is SignUpEvent.SignUpClicked -> {
-                // Handle signup logic here
-                //...
-
                 viewModelScope.launch {
-                    _effect.emit(SignUpEffect.OnSignUpSuccess)
+                    _state.value = _state.value.copy(isLoading = true)
+
+                    try{
+                        val request = RegisterRequest(
+                            username = _state.value.username,
+                            phoneNumber = _state.value.phoneNumber,
+                            password = _state.value.password
+                        )
+
+                        val response = authRepository.registerUser(request)
+                        if (response.isSuccessful && response.body() != null) {
+                            val responseBody = response.body()!!
+                            UserPreferences.saveUserId(context, responseBody.userId)
+                            UserPreferences.saveToken(context, responseBody.token)
+                            _effect.emit(SignUpEffect.OnSignUpSuccess)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    } finally {
+                        _state.value = _state.value.copy(isLoading = false)
+                    }
                 }
 
             }

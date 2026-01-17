@@ -92,6 +92,7 @@ class ProfileViewModel @Inject constructor(
 
             ProfileEvent.OnSignOutClick -> viewModelScope.launch {
                 UserPreferences.clearUserId(context)
+                UserPreferences.clearToken(context)
                 UserPreferences.clearProfileImagePath(context)
 
                 // Call backend to sign out user and delete token

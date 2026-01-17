@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budgetmanager.R
+import com.example.budgetmanager.ui.screen.splash.LoadingScreen
 import com.example.budgetmanager.ui.theme.BudgetManagerTheme
 
 @Composable
@@ -82,6 +83,10 @@ private fun SignUpScreen(
     onEvent: (SignUpEvent) -> Unit,
     modifier: Modifier
 ) {
+    if (state.isLoading) {
+        LoadingScreen(modifier)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()

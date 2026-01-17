@@ -32,6 +32,7 @@ import com.example.budgetmanager.R
 import com.example.budgetmanager.ui.components.BudgetCard
 import com.example.budgetmanager.ui.components.ConfirmModalBottomSheet
 import com.example.budgetmanager.ui.components.DefaultModalBottomSheet
+import com.example.budgetmanager.ui.screen.splash.LoadingScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -62,6 +63,10 @@ private fun HomeScreen(
     onEvent: (HomeEvent) -> Unit,
     modifier: Modifier
 ) {
+    if (state.isLoading) {
+        LoadingScreen(modifier)
+    }
+
     Column(
         modifier = modifier.padding(horizontal = 24.dp)
     ) {

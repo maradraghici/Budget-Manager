@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budgetmanager.data.local.BudgetPreview
 import com.example.budgetmanager.data.local.UserPreferences
+import com.example.budgetmanager.data.repository.BudgetsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,7 +22,8 @@ data class HomeState(
     val budgetDescription: String = "",
     val deleteBudgetId: Long? = null,
     val showCreateBudget: Boolean = false,
-    val showDeleteBudget: Boolean = false
+    val showDeleteBudget: Boolean = false,
+    val isLoading: Boolean = false
 )
 
 sealed interface HomeEvent {
@@ -43,7 +45,8 @@ sealed interface HomeEffect {
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val budgetsRepository: BudgetsRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state = _state.asStateFlow()
@@ -79,10 +82,10 @@ class HomeViewModel @Inject constructor(
                 _state.value = _state.value.copy(budgetName = event.name)
             }
             is HomeEvent.CreateBudgetClicked -> {
-                // Call backend to create a new budget and update the list
+                createBudget()
             }
             is HomeEvent.DeleteBudgetClicked -> {
-                // Call backend to delete the budget and update the list
+                deleteBudget()
             }
             is HomeEvent.OnBudgetHold -> viewModelScope.launch {
                 val storedUserId = UserPreferences.userIdFlow(context).first()
@@ -98,6 +101,40 @@ class HomeViewModel @Inject constructor(
                 _effect.emit(HomeEffect.OnBudgetClick(event.id))
             }
         }
+    }
+
+    private fun loadBudgets() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+
+            val storedUserId = UserPreferences.userIdFlow(context).first()
+            storedUserId?.let {
+                val response = budgetsRepository.getBudgets(storedUserId)
+                if (response.isSuccessful && response.body() != null) {
+
+                }
+
+            }
+            _state.value = _state.value.copy(isLoading = false)
+        }
+    }
+
+    private fun createBudget() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+
+        }
+    }
+
+    private fun deleteBudget() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+
+        }
+    }
+
+    init {
+        loadBudgets()
     }
 
 }
