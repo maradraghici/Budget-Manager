@@ -31,7 +31,7 @@ CREATE TABLE user_budget_table (
 );
 
 alter table user_budget_table 
-add constraint uq_user_budget unique (user_id, budget_id)
+add constraint uq_user_budget unique (user_id, budget_id);
 
 CREATE TABLE expends_table (
     expends_id SERIAL PRIMARY KEY,
