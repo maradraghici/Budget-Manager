@@ -1,6 +1,7 @@
 package com.budget.app.controller;
 
 import java.text.ParseException;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -59,11 +60,12 @@ public class InvitedController {
 
     @PostMapping("/invited/updatePhone")
     @CrossOrigin
-    public void updatePhoneNumber(
+    public ResponseEntity<?> updatePhoneNumber(
             @RequestHeader("Authorization") String authorization,
             @RequestBody InvitedUpdatePhoneVo vo
     ) {
         service.updatePhoneNumber(authorization, vo);
+        return ResponseEntity.ok(Map.of("message", "Phone number updated successfully"));
     }
 }
 

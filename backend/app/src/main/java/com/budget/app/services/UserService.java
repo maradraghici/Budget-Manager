@@ -65,10 +65,6 @@ public class UserService {
             throw new IllegalArgumentException("Username is required");
         }
 
-        if (userRequestVo.getEmail() == null || userRequestVo.getEmail().isBlank()) {
-            throw new IllegalArgumentException("Email is required");
-        }
-
         if (userRequestVo.getPhoneNumber() == null || userRequestVo.getPhoneNumber().isBlank()) {
             throw new IllegalArgumentException("Phone number is required");
         }

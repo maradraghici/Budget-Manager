@@ -5,6 +5,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.budget.app.exception.ResourceNotFoundException;
+import com.budget.app.exception.UnauthorizedException;
 import com.budget.app.model.Invited;
 import com.budget.app.model.InvitedLogin;
 import com.budget.app.repository.InvitedLoginRepository;
@@ -109,26 +111,25 @@ public class InvitedService {
 
     public void updatePhoneNumber(String bearerToken, InvitedUpdatePhoneVo vo) {
 
-        // 1. Nettoyage du Bearer
         String token = bearerToken.replace("Bearer ", "");
 
-        // 2. Extraction sécurisée de l'ID depuis le JWT
-        Long invitedId = extractInvitedIdFromToken(token);
-
-        // 3. Vérification token
-        if (!verifyToken(token)) {
-            throw new RuntimeException("Invalid or expired token");
+        Long invitedId;
+        try {
+            invitedId = extractInvitedIdFromToken(token);
+        } catch (JWTVerificationException e) {
+            throw new UnauthorizedException("Invalid token");
         }
 
-        // 4. Récupération de l'invité
+        if (!verifyToken(token)) {
+            throw new UnauthorizedException("Token expired or invalid");
+        }
+
         Invited invited = invitedRepository.findByInvitedId(invitedId);
         if (invited == null) {
-            throw new RuntimeException("Invited not found");
+            throw new ResourceNotFoundException("Invited not found");
         }
 
-        // 5. Mise à jour
         invited.setPhoneNumber(vo.getPhoneNumber());
-
         invitedRepository.save(invited);
     }
 
