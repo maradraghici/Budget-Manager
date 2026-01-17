@@ -43,5 +43,11 @@ public class InvitedBudgetController {
     public void create(@RequestBody InvitedBudgetVo vo) {
         service.create(vo);
     }
+
+    @DeleteMapping("/invitedbudget/delete/{invitedBudgetId}")
+    public ResponseEntity<Void> deleteInvitedBudget(@PathVariable Long invitedBudgetId) {
+        service.deleteInvitedBudget(invitedBudgetId);
+        return ResponseEntity.noContent().build();
+    }
 }
 

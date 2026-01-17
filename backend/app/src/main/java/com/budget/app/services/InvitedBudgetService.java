@@ -67,6 +67,14 @@ public class InvitedBudgetService {
         );
     }
 
+    public void deleteInvitedBudget(Long invitedBudgetId) {
+        if (repository.existsById(invitedBudgetId)) {
+            repository.deleteById(invitedBudgetId);
+        } else {
+            throw new IllegalArgumentException("Link invited budget not found: " + invitedBudgetId);
+        }
+    } 
+
     private InvitedBudgetResponseVo toVo(InvitedBudget ib) {
         return InvitedBudgetResponseVo.builder()
                 .invitedBudgetId(ib.getInvitedBudgetId())

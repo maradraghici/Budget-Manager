@@ -51,7 +51,7 @@ CREATE TABLE user_expends_table (
 );
 
 alter table user_expends_table 
-add constraint uq_user_expends unique (user_id, expends_id)
+add constraint uq_user_expends unique (user_id, expends_id);
 
 CREATE TABLE invited_table (
     invited_id SERIAL PRIMARY KEY,

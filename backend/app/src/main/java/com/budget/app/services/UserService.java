@@ -79,11 +79,11 @@ public class UserService {
 
         String token = createJsonWebToken(savedUser.getUserId());
 
-            UserLogin userLogin = UserLogin.builder()
-                .user(savedUser)
-                .token(token)
-                .tokenExpireTime(getCurrentTimeStamp())
-                .build();
+        UserLogin userLogin = UserLogin.builder()
+            .user(savedUser)
+            .token(token)
+            .tokenExpireTime(getCurrentTimeStamp())
+            .build();
 
         userLoginRepository.save(userLogin);
         

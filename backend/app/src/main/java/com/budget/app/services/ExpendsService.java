@@ -29,6 +29,22 @@ public class ExpendsService {
     }
 
     public Expends createNewExpends(ExpendsVo expendsVo) {
+        if (expendsVo.getAmount() == null){
+            throw new IllegalArgumentException("Amount is required");
+        }
+        
+        if (expendsVo.getExpendsName() == null || expendsVo.getExpendsName().isBlank()){
+            throw new IllegalArgumentException("Expends name is required");
+        }
+
+        if (expendsVo.getBudgetId() == null){
+            throw new IllegalArgumentException("Budget reference is required");
+        }
+        
+        if (expendsVo.getPaidById() == null){
+            throw new IllegalArgumentException("User reference is required");
+        }
+
         User user = null;
         if (expendsVo.getPaidById() != null) {
             user = userRepository.findById(expendsVo.getPaidById())
@@ -70,6 +86,14 @@ public class ExpendsService {
                 .map(this::toResponseVo)
                 .toList();
     }
+
+    public void deleteExpends(Long expendsId) {
+        if (expendsRepository.existsById(expendsId)) {
+            expendsRepository.deleteById(expendsId);
+        } else {
+            throw new IllegalArgumentException("Expends not found: " + expendsId);
+        }
+    } 
 
     // =========================
     // 🔁 Mapper interne

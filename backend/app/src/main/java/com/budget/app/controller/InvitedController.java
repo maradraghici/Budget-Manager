@@ -36,8 +36,8 @@ public class InvitedController {
     }
 
     @PostMapping("/invited/create")
-    public void create(@RequestBody InvitedVo vo) {
-        service.create(vo);
+    public InvitedTokenResponseVo create(@RequestBody InvitedVo vo) {
+        return service.create(vo);
     }
 
     @DeleteMapping("/invited/delete/{id}")

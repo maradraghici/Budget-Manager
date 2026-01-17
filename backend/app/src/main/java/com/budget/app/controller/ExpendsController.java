@@ -9,8 +9,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 
@@ -39,5 +37,11 @@ public class ExpendsController {
     public ResponseEntity<List<ExpendsResponseVo>> getExpendsBudget(@PathVariable Long budgetId) {
         List<ExpendsResponseVo> expends = expendsService.getExpendsByBudgetId(budgetId);
         return ResponseEntity.ok(expends);
+    }
+
+    @DeleteMapping("/expends/delete/{expendsId}")
+    public ResponseEntity<Void> deleteExpends(@PathVariable Long expendsId) {
+        expendsService.deleteExpends(expendsId);
+        return ResponseEntity.noContent().build();
     }
 }

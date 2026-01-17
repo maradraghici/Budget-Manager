@@ -52,17 +52,49 @@ public class InvitedService {
                 .toList();
     }
 
-    public void create(InvitedVo vo) {
-        invitedRepository.save(
+    public InvitedTokenResponseVo create(InvitedVo vo) {
+
+        if (vo.getInvitedName() == null || vo.getInvitedName().isBlank()){
+            throw new IllegalArgumentException("Invited name is required");
+        }
+
+        if (vo.getPhoneNumber() == null || vo.getPhoneNumber().isBlank()){
+            throw new IllegalArgumentException("Phone number is required");
+        }
+
+        Invited invited = invitedRepository.save(
                 Invited.builder()
                         .invitedName(vo.getInvitedName())
                         .phoneNumber(vo.getPhoneNumber())
                         .build()
         );
+
+        String token = createJsonWebToken(invited.getInvitedId());
+
+        InvitedLogin invitedLogin = InvitedLogin.builder()
+            .invited(invited)
+            .token(token)
+            .tokenExpireTime(getCurrentTimeStamp())
+            .build();
+
+        invitedLoginRepository.save(invitedLogin);
+
+        return InvitedTokenResponseVo.builder()
+                    .invitedId(invited.getInvitedId())
+                    .token(token)
+                    .build();
     }
 
     public void delete(Long id) {
-        invitedRepository.deleteById(id);
+        Invited invited = invitedRepository.findByInvitedId(id);
+        if (invited == null){
+            throw new IllegalArgumentException("Invited not found: " + id);
+        }
+
+        InvitedLogin Inv_login = invitedLoginRepository.findByInvited_InvitedId(id);
+        invitedLoginRepository.delete(Inv_login);
+
+        invitedRepository.delete(invited);
     }
 
     private InvitedResponseVo toVo(Invited invited) {
@@ -105,7 +137,7 @@ public class InvitedService {
                     .build();
 
         } else {
-            throw new RuntimeException("Invited not found with phone number");
+            throw new IllegalArgumentException("Invited not found with phone number");
         }
     }
 

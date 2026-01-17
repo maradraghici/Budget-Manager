@@ -48,12 +48,15 @@ public class BudgetService {
                             new IllegalArgumentException("User not found: " + budgetVo.getUserId()));
         }
 
+        if (budgetVo.getBudgetName() == null || budgetVo.getBudgetName().isBlank()){
+            throw new IllegalArgumentException("Budget name is required");
+        }
+
         Budget budget = Budget.builder()
                 .budgetName(budgetVo.getBudgetName())
                 .commentary(budgetVo.getCommentary())
                 .user(user)
                 .build();
-
 
         return budgetRepository.save(budget);
     }
