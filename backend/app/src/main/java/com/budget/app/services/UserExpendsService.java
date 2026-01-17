@@ -64,8 +64,8 @@ public class UserExpendsService {
         }
 
         UserExpends newUserExpends = UserExpends.builder()
-                .userId(user) // Set userId appropriately
-                .expendsId(expends) // Set expendsId appropriately
+                .userId(user)
+                .expendsId(expends)
                 .build();
 
         return userExpendsRepository.save(newUserExpends);

@@ -2,6 +2,7 @@ package com.budget.app.controller;
 
 import java.text.ParseException;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.budget.app.services.InvitedService;
@@ -23,8 +24,14 @@ public class InvitedController {
     }
 
     @GetMapping("/invited/{id}")
-    public InvitedResponseVo getById(@PathVariable Long id) {
-        return service.getById(id);
+    public ResponseEntity<InvitedResponseVo> getById(@PathVariable Long id) {
+        InvitedResponseVo irv = service.getById(id);
+        if (irv != null) {
+            return ResponseEntity.ok(irv);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+        
     }
 
     @PostMapping("/invited/create")
@@ -33,8 +40,9 @@ public class InvitedController {
     }
 
     @DeleteMapping("/invited/delete/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/invited/authenticate")

@@ -18,11 +18,15 @@ import com.budget.app.security.SecurityConfig;
 import com.budget.app.repository.UserRepository;
 import com.budget.app.repository.UserLoginRepository;
 import com.budget.app.model.UserLogin;
+import com.budget.app.exception.ResourceNotFoundException;
+import com.budget.app.exception.UnauthorizedException;
 import com.budget.app.model.User;
 import com.budget.app.vo.UserRequestVo;
 import com.budget.app.vo.UserTokenResponseVo;
 import com.budget.app.vo.UserUpdateVo;
+import com.budget.app.vo.UserAuthorizeRequestVo;
 import com.budget.app.vo.UserAuthorizeResponseVo;
+import com.budget.app.vo.UserLoginRequestVo;
 
 @Service
 public class UserService {
@@ -41,59 +45,108 @@ public class UserService {
 
     public UserRequestVo findByUserId(Long userId) {
 
-        User user = userRepository.findByUserId(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found: " + userId));
 
         return UserRequestVo.builder()
                 .username(user.getUserName())
                 .email(user.getEmail())
                 .build();
-    }
+        }
 
-    public void registerNewUser(UserRequestVo userRequestVo) {
+    public UserTokenResponseVo registerNewUser(UserRequestVo userRequestVo) {
         
         if (userRequestVo.getPassword() == null || userRequestVo.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Password cannot be null or empty");
         }
 
+        if (userRequestVo.getUsername() == null || userRequestVo.getUsername().isBlank()) {
+            throw new IllegalArgumentException("Username is required");
+        }
+
+        if (userRequestVo.getEmail() == null || userRequestVo.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+
+        if (userRequestVo.getPhoneNumber() == null || userRequestVo.getPhoneNumber().isBlank()) {
+            throw new IllegalArgumentException("Phone number is required");
+        }
+
         User user = User.builder()
                 .userName(userRequestVo.getUsername())
                 .password(securityConfig.passwordEncoder().encode(userRequestVo.getPassword()))
+                .phoneNumber(userRequestVo.getPhoneNumber())
                 .email(userRequestVo.getEmail())
                 .build();
-        userRepository.save(user);
-    }
+        User savedUser = userRepository.save(user);
 
-    public UserTokenResponseVo validateUserCredentialsAndGenerateToken(UserRequestVo userRequestVo) {
-        // print userRequestVo
-        System.out.println("Validating user: " + userRequestVo.getUsername());
-        User user = userRepository.findByUserName(userRequestVo.getUsername());
-        System.out.println("User found: " + (user != null ? user.getUserName() : "null"));
-        if (user != null &&
-                bCryptPasswordEncoder.matches(userRequestVo.getPassword(),
-                user.getPassword())) {
-            //String token=  RandomStringUtils.random(25, true, true);
-            String token = createJsonWebToken(user.getUserId());
+        String token = createJsonWebToken(savedUser.getUserId());
+
             UserLogin userLogin = UserLogin.builder()
-                    .user(user)
-                    .token(token)
-                    .tokenExpireTime(getCurrentTimeStamp())
-                    .build();
-            UserLogin last_userLogin = userLoginRepository.findByUser_UserId(user.getUserId());
-            if (last_userLogin != null){
-                userLoginRepository.deleteById(last_userLogin.getUserLoginId());
-            }
-            userLoginRepository.save(userLogin);
-            UserTokenResponseVo userTokenResponseVo = new UserTokenResponseVo();
-            userTokenResponseVo.setToken(token);
-            userTokenResponseVo.setUsername(userRequestVo.getUsername());
+                .user(savedUser)
+                .token(token)
+                .tokenExpireTime(getCurrentTimeStamp())
+                .build();
 
-            return userTokenResponseVo;
-        } else {
-            throw new RuntimeException("User not found");
-        }
+        userLoginRepository.save(userLogin);
+        
+        return UserTokenResponseVo.builder()
+            .userId(savedUser.getUserId())
+            .token(token)
+            .build();
     }
 
-    public UserAuthorizeResponseVo authorizeV2(UserRequestVo userRequestVo) {
+    public UserTokenResponseVo validateUserCredentialsAndGenerateToken(UserLoginRequestVo userRequestVo) {
+
+        // 1️⃣ Validation des inputs
+        if (userRequestVo.getUsername() == null || userRequestVo.getUsername().isBlank()
+                || userRequestVo.getPassword() == null || userRequestVo.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Username and password are required");
+        }
+
+        // 2️⃣ Recherche utilisateur
+        User user = userRepository.findByUserName(userRequestVo.getUsername());
+
+        if (user == null) {
+            throw new IllegalArgumentException("Invalid credentials");
+        }
+
+        // 3️⃣ Vérification mot de passe
+        if (!bCryptPasswordEncoder.matches(
+                userRequestVo.getPassword(),
+                user.getPassword())) {
+            throw new IllegalArgumentException("Invalid credentials");
+        }
+
+        // 4️⃣ Génération du JWT avec userId
+        String token = createJsonWebToken(user.getUserId());
+
+        // 5️⃣ Invalidation ancien token (1 session max)
+        UserLogin lastLogin = userLoginRepository
+                .findByUser_UserId(user.getUserId());
+
+        if (lastLogin != null) {
+            userLoginRepository.deleteById(lastLogin.getUserLoginId());
+        }
+
+        // 6️⃣ Sauvegarde nouveau token
+        UserLogin userLogin = UserLogin.builder()
+                .user(user)
+                .token(token)
+                .tokenExpireTime(getCurrentTimeStamp())
+                .build();
+
+        userLoginRepository.save(userLogin);
+
+        // 7️⃣ Réponse
+        return UserTokenResponseVo.builder()
+                .userId(user.getUserId())
+                .token(token)
+                .build();
+    }
+
+    public UserAuthorizeResponseVo authorizeV2(UserAuthorizeRequestVo userRequestVo) {
         try {
             Long userId = extractUserIdFromToken(userRequestVo.getToken());
 
@@ -113,28 +166,26 @@ public class UserService {
     }
 
     public void updateUser(String token, UserUpdateVo vo) {
-        // 1️⃣ Vérification + extraction userId
+
         Long userId;
         try {
             userId = extractUserIdFromToken(token);
         } catch (JWTVerificationException e) {
-            throw new RuntimeException("Invalid token");
+            throw new UnauthorizedException("Invalid or expired token");
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
 
-        // 2️⃣ Update username
         if (vo.getUsername() != null && !vo.getUsername().isBlank()) {
             user.setUserName(vo.getUsername());
         }
 
-        // 3️⃣ Update phone
         if (vo.getPhoneNumber() != null && !vo.getPhoneNumber().isBlank()) {
             user.setPhoneNumber(vo.getPhoneNumber());
         }
 
-        // 4️⃣ Update password (SECURISÉ)
         if (vo.getNewPassword() != null && !vo.getNewPassword().isBlank()) {
 
             if (vo.getOldPassword() == null || vo.getOldPassword().isBlank()) {
@@ -148,14 +199,22 @@ public class UserService {
             user.setPassword(
                     bCryptPasswordEncoder.encode(vo.getNewPassword())
             );
-
-            // Optionnel mais recommandé : invalider les anciens tokens
-            // userLoginRepository.deleteByUser_UserId(userId);
         }
 
         userRepository.save(user);
     }
 
+    public void deleteUser(Long userId){
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        // Supprimer tous les tokens liés à ce user
+        UserLogin logins = userLoginRepository.findByUser_UserId(userId);
+        userLoginRepository.delete(logins);
+
+        // Maintenant on peut supprimer l'utilisateur
+        userRepository.delete(user);
+    }
 
     public String getCurrentTimeStamp() {
         Date newDate = DateUtils.addHours(new Date(), 3);

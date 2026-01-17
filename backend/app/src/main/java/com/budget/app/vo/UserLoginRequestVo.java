@@ -1,5 +1,4 @@
 package com.budget.app.vo;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,10 +8,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRequestVo {
+public class UserLoginRequestVo {
     private String username;
-    private String email;
     private String password;
-    private String phoneNumber;
-    private String token;
 }

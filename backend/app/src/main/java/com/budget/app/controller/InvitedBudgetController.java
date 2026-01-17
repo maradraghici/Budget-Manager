@@ -2,9 +2,8 @@ package com.budget.app.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.budget.app.services.InvitedBudgetService;
 import com.budget.app.vo.InvitedBudgetResponseVo;
@@ -21,13 +20,23 @@ public class InvitedBudgetController {
     }
 
     @GetMapping("/invitedbudget/invited/{invitedId}")
-    public List<InvitedBudgetResponseVo> getByInvited(@PathVariable Long invitedId) {
-        return service.getByInvited(invitedId);
+    public ResponseEntity<List<InvitedBudgetResponseVo>> getByInvited(@PathVariable Long invitedId) {
+        List<InvitedBudgetResponseVo> ListIRV = service.getByInvited(invitedId);
+        if (ListIRV != null) {
+            return ResponseEntity.ok(ListIRV);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/invitedbudget/budget/{budgetId}")
-    public List<InvitedBudgetResponseVo> getByBudget(@PathVariable Long budgetId) {
-        return service.getByBudget(budgetId);
+    public ResponseEntity<List<InvitedBudgetResponseVo>> getByBudget(@PathVariable Long budgetId) {
+        List<InvitedBudgetResponseVo> ListIRV = service.getByBudget(budgetId);
+        if (ListIRV != null) {
+            return ResponseEntity.ok(ListIRV);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/invitedbudget/create")
