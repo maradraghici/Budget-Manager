@@ -3,8 +3,9 @@ package com.example.budgetmanager.ui.screen.home
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.budgetmanager.data.local.BudgetPreview
+import com.example.budgetmanager.data.local.Budget
 import com.example.budgetmanager.data.local.UserPreferences
+import com.example.budgetmanager.data.remote.dto.CreateBudgetRequest
 import com.example.budgetmanager.data.repository.BudgetsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class HomeState(
-    val budgetPreviewList: List<BudgetPreview> = budgetPreviewListLocal,
+    val budgetPreviewList: List<Budget> = emptyList(),
     val budgetName: String = "",
     val budgetDescription: String = "",
     val deleteBudgetId: Long? = null,
@@ -33,7 +34,7 @@ sealed interface HomeEvent {
     data object ShowDeleteBudgetChanged : HomeEvent
     data object CreateBudgetClicked : HomeEvent
     data object DeleteBudgetClicked : HomeEvent
-    data class OnBudgetHold(val id: Long, val ownerId: Long) : HomeEvent
+    data class OnBudgetHold(val id: Long) : HomeEvent
 
     data class OnBudgetClick(val id: Long) : HomeEvent
 }
@@ -87,9 +88,9 @@ class HomeViewModel @Inject constructor(
             is HomeEvent.DeleteBudgetClicked -> {
                 deleteBudget()
             }
-            is HomeEvent.OnBudgetHold -> viewModelScope.launch {
-                val storedUserId = UserPreferences.userIdFlow(context).first()
-                if(storedUserId == event.ownerId) {
+            is HomeEvent.OnBudgetHold -> {
+                val budget = _state.value.budgetPreviewList.find { it.id == event.id }
+                if(budget?.isOwner == true) {
                     _state.value = _state.value.copy(
                         showDeleteBudget = true,
                         deleteBudgetId = event.id
@@ -109,9 +110,16 @@ class HomeViewModel @Inject constructor(
 
             val storedUserId = UserPreferences.userIdFlow(context).first()
             storedUserId?.let {
-                val response = budgetsRepository.getBudgets(storedUserId)
-                if (response.isSuccessful && response.body() != null) {
+                val responseOwner = budgetsRepository.getBudgetsForOwner(storedUserId)
+                if (responseOwner.isSuccessful && responseOwner.body() != null) {
+                    _state.value = _state.value.copy(budgetPreviewList = responseOwner.body()!!)
+                }
 
+                val responseMember = budgetsRepository.getBudgetsForMember(storedUserId)
+                if (responseMember.isSuccessful && responseMember.body() != null) {
+                    _state.value = _state.value.copy(
+                        budgetPreviewList = _state.value.budgetPreviewList + responseMember.body()!!
+                    )
                 }
 
             }
@@ -122,7 +130,20 @@ class HomeViewModel @Inject constructor(
     private fun createBudget() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
+            val storedUserId = UserPreferences.userIdFlow(context).first()
 
+            storedUserId?.let {
+                val request = CreateBudgetRequest(
+                    budgetName = _state.value.budgetName,
+                    budgetDescription = _state.value.budgetDescription,
+                    userId = storedUserId
+                )
+                val response = budgetsRepository.createBudget(request)
+                if (response.isSuccessful) {
+                    loadBudgets()
+                }
+            }
+            _state.value = _state.value.copy(isLoading = false)
         }
     }
 
@@ -130,6 +151,13 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
 
+            _state.value.deleteBudgetId?.let {
+                val response = budgetsRepository.deleteBudget(it)
+                if (response.isSuccessful)
+                    loadBudgets()
+            }
+
+            _state.value = _state.value.copy(isLoading = false)
         }
     }
 
@@ -138,9 +166,3 @@ class HomeViewModel @Inject constructor(
     }
 
 }
-
-internal val budgetPreviewListLocal : List<BudgetPreview> = listOf(
-    BudgetPreview(0, "Trip to Miami", "Summer 2024", 0),
-    BudgetPreview(1, "Months in Paris", "The collocation for the internship", 1),
-    BudgetPreview(2, "Budget title", "Comment", 0),
-)

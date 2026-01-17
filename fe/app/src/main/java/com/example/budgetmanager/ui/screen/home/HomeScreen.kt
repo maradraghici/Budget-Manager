@@ -56,7 +56,6 @@ fun HomeScreenDestination(
     HomeScreen(state, vm::onEvent, modifier = modifier)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreen(
     state: HomeState,
@@ -95,7 +94,7 @@ private fun HomeScreen(
                         onEvent(HomeEvent.OnBudgetClick(budget.id))
                     },
                     onHold = {
-                        onEvent(HomeEvent.OnBudgetHold(budget.id, budget.owmerId))
+                        onEvent(HomeEvent.OnBudgetHold(budget.id))
                     },
                     modifier = Modifier
                         .fillMaxWidth()
