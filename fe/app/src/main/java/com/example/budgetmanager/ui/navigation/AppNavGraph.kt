@@ -29,8 +29,8 @@ fun AppNavGraph(
     ) {
         composable(Routes.HOME) {
             HomeScreenDestination(
-                onBudgetClick = { id ->
-                    navController.navigate(Routes.budgetDetails(id))
+                onBudgetClick = { id, title ->
+                    navController.navigate(Routes.budgetDetails(id, title))
                 },
                 modifier = modifier
             )
@@ -49,8 +49,11 @@ fun AppNavGraph(
         }
 
         composable(
-            route = "${Routes.BUDGET_DETAILS}/{id}",
-            arguments = listOf(navArgument("id") { type = NavType.LongType })
+            route = "${Routes.BUDGET_DETAILS}/{id}/{title}",
+            arguments = listOf(
+                navArgument("id") { type = NavType.LongType },
+                navArgument("title") { type = NavType.StringType }
+            )
         ) {
             BudgetDetailsScreenDestination(
                 onTitleChanged = { onEvent(MainEvent.OnTitleChanged(it)) },

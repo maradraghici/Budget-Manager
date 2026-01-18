@@ -4,6 +4,8 @@ import com.example.budgetmanager.data.repository.AuthRepository
 import com.example.budgetmanager.data.repository.AuthRepositoryImpl
 import com.example.budgetmanager.data.repository.BudgetsRepository
 import com.example.budgetmanager.data.repository.BudgetsRepositoryImpl
+import com.example.budgetmanager.data.repository.ExpensesRepository
+import com.example.budgetmanager.data.repository.ExpensesRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -21,5 +23,10 @@ abstract class RepositoryModule {
     abstract fun bindBudgetsRepository(
         budgetsRepositoryImpl: BudgetsRepositoryImpl
     ): BudgetsRepository
+
+    @Binds
+    abstract fun bindExpensesRepository(
+        expensesRepositoryImpl: ExpensesRepositoryImpl
+    ): ExpensesRepository
 
 }

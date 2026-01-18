@@ -73,7 +73,11 @@ fun SignUpScreenDestination(
         }
     }
 
-    SignUpScreen(state, vm::onEvent, modifier)
+    if (state.isLoading) {
+        LoadingScreen(modifier)
+    } else {
+        SignUpScreen(state, vm::onEvent, modifier)
+    }
 }
 
 
@@ -83,10 +87,6 @@ private fun SignUpScreen(
     onEvent: (SignUpEvent) -> Unit,
     modifier: Modifier
 ) {
-    if (state.isLoading) {
-        LoadingScreen(modifier)
-    }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()

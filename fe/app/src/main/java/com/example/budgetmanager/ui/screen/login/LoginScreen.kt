@@ -65,7 +65,11 @@ fun LoginScreenDestination(
         }
     }
 
-    LoginScreen(state, vm::onEvent, modifier)
+    if (state.isLoading) {
+        LoadingScreen(modifier)
+    } else {
+        LoginScreen(state, vm::onEvent, modifier)
+    }
 }
 
 
@@ -75,10 +79,6 @@ fun LoginScreen(
     onEvent: (LoginEvent) -> Unit,
     modifier: Modifier
 ) {
-    if (state.isLoading) {
-        LoadingScreen(modifier)
-    }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()

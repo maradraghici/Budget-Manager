@@ -2,6 +2,7 @@ package com.example.budgetmanager.di
 
 import com.example.budgetmanager.data.remote.AuthApiService
 import com.example.budgetmanager.data.remote.BudgetsApiService
+import com.example.budgetmanager.data.remote.ExpensesApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -50,5 +51,11 @@ object NetworkModule {
     @Provides
     fun provideBudgetsApiService(retrofit: Retrofit): BudgetsApiService {
         return retrofit.create(BudgetsApiService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideExpensesApiService(retrofit: Retrofit): ExpensesApiService {
+        return retrofit.create(ExpensesApiService::class.java)
     }
 }

@@ -8,6 +8,8 @@ import com.example.budgetmanager.data.local.BudgetDetails
 import com.example.budgetmanager.data.local.Expense
 import com.example.budgetmanager.data.local.User
 import com.example.budgetmanager.data.local.UserPreferences
+import com.example.budgetmanager.data.remote.dto.CreateExpenseRequest
+import com.example.budgetmanager.data.repository.ExpensesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +21,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class BudgetDetailsState(
-    val budgetDetails: BudgetDetails? = null,
+    val expenses: List<Expense> = emptyList(),
+    val budgetTitle: String = "",
     val showOptions: Boolean = false,
     val showDeleteExpense: Boolean = false,
     val showAddExpense: Boolean = false,
@@ -29,7 +32,8 @@ data class BudgetDetailsState(
     val newExpenseName: String = "",
     val newExpensePrice: String = "",
     val newUserPhoneNumber: String = "+",
-    val removeUserPhoneNumber: String = "+"
+    val removeUserPhoneNumber: String = "+",
+    val isLoading: Boolean = false
 )
 
 sealed interface BudgetDetailsEvent {
@@ -57,11 +61,13 @@ sealed interface BudgetDetailsEffect {
 @HiltViewModel
 class BudgetDetailsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val expensesRepository: ExpensesRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     val id: Long = checkNotNull(savedStateHandle["id"])
+    val title: String = checkNotNull(savedStateHandle["title"])
 
-    private val _state = MutableStateFlow(BudgetDetailsState())
+    private val _state = MutableStateFlow(BudgetDetailsState(budgetTitle = title))
     val state = _state.asStateFlow()
 
     private val _effect = MutableSharedFlow<BudgetDetailsEffect>()
@@ -70,7 +76,7 @@ class BudgetDetailsViewModel @Inject constructor(
     fun onEvent(event: BudgetDetailsEvent) {
         when(event) {
             is BudgetDetailsEvent.DeleteExpenseClicked -> {
-                // Call backend to delete the expense and update the list
+                deleteExpense()
             }
             is BudgetDetailsEvent.ShowDeleteExpenseChanged -> {
                 _state.value = _state.value.copy(
@@ -130,7 +136,7 @@ class BudgetDetailsViewModel @Inject constructor(
                 }
             }
             is BudgetDetailsEvent.AddExpenseClicked -> {
-                // Call backend to add the expense and update the list
+                addExpense()
             }
             is BudgetDetailsEvent.NewExpenseNameChanged -> {
                 _state.value = _state.value.copy(newExpenseName = event.name)
@@ -158,9 +164,59 @@ class BudgetDetailsViewModel @Inject constructor(
     }
 
     private fun loadBudgetDetails() {
-        _state.value = _state.value.copy(
-            budgetDetails = budgetDetailsPreview
-        )
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            val response = expensesRepository.getExpenses(id)
+            if (response.isSuccessful && response.body() != null) {
+                _state.value = _state.value.copy(
+                    expenses = response.body()!!
+                )
+            }
+            _state.value = _state.value.copy(
+                showAddExpense = false,
+                newExpenseName = "",
+                newExpensePrice = "",
+                isLoading = false
+            )
+        }
+    }
+
+    private fun addExpense() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+
+            val userId = UserPreferences.userIdFlow(context).first()
+
+            userId?.let {
+                val request = CreateExpenseRequest(
+                    name = _state.value.newExpenseName,
+                    amount = _state.value.newExpensePrice.toDouble(),
+                    budgetId = id,
+                    userId = it,
+                )
+                val response = expensesRepository.createExpense(request)
+                if (response.isSuccessful) {
+                    loadBudgetDetails()
+                }
+            }
+            _state.value = _state.value.copy(isLoading = false)
+        }
+    }
+
+    private fun deleteExpense() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+
+            val response = expensesRepository.deleteExpense(_state.value.deleteExpenseId!!)
+            if (response.isSuccessful) {
+                loadBudgetDetails()
+            }
+            _state.value = _state.value.copy(
+                showDeleteExpense = false,
+                deleteExpenseId = null,
+                isLoading = false
+            )
+        }
     }
 
     init {

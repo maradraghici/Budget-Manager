@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreenDestination(
-    onBudgetClick: (Long) -> Unit,
+    onBudgetClick: (Long, String) -> Unit,
     modifier: Modifier
 ) {
     val vm: HomeViewModel = hiltViewModel()
@@ -47,7 +47,7 @@ fun HomeScreenDestination(
         vm.effect.collect { effect ->
             when (effect) {
                 is HomeEffect.OnBudgetClick -> {
-                    onBudgetClick(effect.id)
+                    onBudgetClick(effect.id, effect.title)
                 }
             }
         }
@@ -91,7 +91,7 @@ private fun HomeScreen(
                     description = budget.description,
                     image = painterResource(id = budgetImages[(budget.id % budgetImages.size).toInt()]),
                     onClick = {
-                        onEvent(HomeEvent.OnBudgetClick(budget.id))
+                        onEvent(HomeEvent.OnBudgetClick(budget.id, budget.title))
                     },
                     onHold = {
                         onEvent(HomeEvent.OnBudgetHold(budget.id))

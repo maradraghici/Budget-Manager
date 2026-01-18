@@ -17,7 +17,7 @@ class BudgetsRepositoryImpl @Inject constructor(
             val budgets = response.body()!!
             return Response.success(budgets.map { it.toBudgetOwner() })
         } else {
-            return Response.error(response.code(), response.errorBody()!!)
+            return Response.success(emptyList())
         }
 
     }
@@ -28,7 +28,7 @@ class BudgetsRepositoryImpl @Inject constructor(
             val budgets = response.body()!!
             return Response.success(budgets.map { it.toBudgetMember() })
         } else {
-            return Response.error(response.code(), response.errorBody()!!)
+            return Response.success(emptyList())
         }
     }
 

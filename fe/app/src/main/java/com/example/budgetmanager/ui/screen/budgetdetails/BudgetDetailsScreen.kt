@@ -34,6 +34,7 @@ import com.example.budgetmanager.ui.components.DefaultModalBottomSheet
 import com.example.budgetmanager.ui.components.ExpenseCard
 import com.example.budgetmanager.ui.components.OptionsModalBottomSheet
 import com.example.budgetmanager.ui.screen.main.MainEvent
+import com.example.budgetmanager.ui.screen.splash.LoadingScreen
 
 @Composable
 fun BudgetDetailsScreenDestination(
@@ -52,13 +53,15 @@ fun BudgetDetailsScreenDestination(
         }
     }
 
-    LaunchedEffect(state.budgetDetails?.title) {
-        state.budgetDetails?.let {
-            onTitleChanged(it.title)
-        }
+    LaunchedEffect(state.budgetTitle) {
+        onTitleChanged(state.budgetTitle)
     }
 
-    BudgetDetailsScreen(state, vm::onEvent, modifier)
+    if (state.isLoading) {
+        LoadingScreen(modifier)
+    } else {
+        BudgetDetailsScreen(state, vm::onEvent, modifier)
+    }
 }
 
 @Composable
@@ -71,16 +74,14 @@ private fun BudgetDetailsScreen(
 
     Column(modifier = modifier.padding(horizontal = 24.dp).padding(top = 24.dp)) {
         LazyColumn(modifier = Modifier.weight(1f)) {
-            state.budgetDetails?.let {
-                items(it.expenses) { expense ->
-                    ExpenseCard(
-                        expense = expense,
-                        onClick = { onEvent(BudgetDetailsEvent.OnExpenseClicked(expense.id, expense.user.id)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    )
-                }
+            items(state.expenses) { expense ->
+                ExpenseCard(
+                    expense = expense,
+                    onClick = { onEvent(BudgetDetailsEvent.OnExpenseClicked(expense.id, expense.user.id)) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
             }
         }
         Row(

@@ -36,11 +36,11 @@ sealed interface HomeEvent {
     data object DeleteBudgetClicked : HomeEvent
     data class OnBudgetHold(val id: Long) : HomeEvent
 
-    data class OnBudgetClick(val id: Long) : HomeEvent
+    data class OnBudgetClick(val id: Long, val title: String) : HomeEvent
 }
 
 sealed interface HomeEffect {
-    data class OnBudgetClick(val id: Long) : HomeEffect
+    data class OnBudgetClick(val id: Long, val title: String) : HomeEffect
 }
 
 
@@ -99,7 +99,7 @@ class HomeViewModel @Inject constructor(
             }
 
             is HomeEvent.OnBudgetClick -> viewModelScope.launch {
-                _effect.emit(HomeEffect.OnBudgetClick(event.id))
+                _effect.emit(HomeEffect.OnBudgetClick(event.id, event.title))
             }
         }
     }
