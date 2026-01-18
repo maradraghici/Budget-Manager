@@ -4,6 +4,7 @@ import com.example.budgetmanager.data.local.Budget
 import com.example.budgetmanager.data.mapper.toBudgetMember
 import com.example.budgetmanager.data.mapper.toBudgetOwner
 import com.example.budgetmanager.data.remote.BudgetsApiService
+import com.example.budgetmanager.data.remote.dto.AddUserRequest
 import com.example.budgetmanager.data.remote.dto.CreateBudgetRequest
 import retrofit2.Response
 import javax.inject.Inject
@@ -30,6 +31,16 @@ class BudgetsRepositoryImpl @Inject constructor(
         } else {
             return Response.success(emptyList())
         }
+    }
+
+    override suspend fun addUserToBudget(phoneNumber: String, budgetId: Long): Response<Unit> {
+        val request = AddUserRequest(phoneNumber, budgetId)
+        return budgetsApiService.addUserToBudget(request)
+    }
+
+    override suspend fun removeUserFromBudget(phoneNumber: String, budgetId: Long): Response<Unit> {
+        val request = AddUserRequest(phoneNumber, budgetId)
+        return budgetsApiService.removeUserFromBudget(request)
     }
 
     override suspend fun createBudget(createBudgetRequest: CreateBudgetRequest): Response<Unit> {

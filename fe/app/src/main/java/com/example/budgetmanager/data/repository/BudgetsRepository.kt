@@ -8,6 +8,8 @@ import retrofit2.Response
 interface BudgetsRepository {
     suspend fun getBudgetsForOwner(userId: Long): Response<List<Budget>>
     suspend fun getBudgetsForMember(userId: Long): Response<List<Budget>>
+    suspend fun addUserToBudget(phoneNumber: String, budgetId: Long): Response<Unit>
+    suspend fun removeUserFromBudget(phoneNumber: String, budgetId: Long): Response<Unit>
     suspend fun createBudget(createBudgetRequest: CreateBudgetRequest): Response<Unit>
     suspend fun deleteBudget(budgetId: Long): Response<Unit>
 }

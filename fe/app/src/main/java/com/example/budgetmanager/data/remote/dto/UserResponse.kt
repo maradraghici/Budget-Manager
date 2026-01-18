@@ -2,9 +2,9 @@ package com.example.budgetmanager.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class LoginRequest(
+data class UserResponse(
     @SerializedName("username")
     val username: String,
-    @SerializedName("password")
-    val password: String
+    @SerializedName("phoneNumber")
+    val phoneNumber: String
 )

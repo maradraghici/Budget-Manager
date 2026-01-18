@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budgetmanager.data.local.User
 import com.example.budgetmanager.data.local.UserPreferences
+import com.example.budgetmanager.data.remote.dto.UserResponse
+import com.example.budgetmanager.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +21,7 @@ import java.io.File
 import javax.inject.Inject
 
 data class ProfileState(
-    val user: User? = null,
+    val user: UserResponse? = null,
     val username: String = "",
     val phoneNumber: String = "",
     val oldPassword: String = "",
@@ -28,7 +30,8 @@ data class ProfileState(
     val oldPasswordVisibility: Boolean = false,
     val passwordVisibility: Boolean = false,
     val secondPasswordVisibility: Boolean = false,
-    val imageUri: Uri? = null
+    val imageUri: Uri? = null,
+    val isLoading: Boolean = false
 )
 
 sealed interface ProfileEvent {
@@ -51,7 +54,8 @@ sealed interface ProfileEffect {
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(ProfileState())
     val state = _state.asStateFlow()
@@ -127,15 +131,25 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun loadUser() = viewModelScope.launch {
+        _state.value = _state.value.copy(isLoading = true)
+
         val storedUserId = UserPreferences.userIdFlow(context).first()
         val imagePath = UserPreferences.profileImagePathFlow(context).first()
 
-        _state.value = _state.value.copy(
-            user = userPreview,
-            username = userPreview.username,
-            phoneNumber = userPreview.phoneNumber,
-            imageUri = imagePath?.toUri()
-        )
+        storedUserId?.let {
+            val response = authRepository.getUser(it)
+
+            if (response.isSuccessful && response.body() != null) {
+                val user = response.body()!!
+                _state.value = _state.value.copy(
+                    user = user,
+                    username = user.username,
+                    phoneNumber = user.phoneNumber,
+                    imageUri = imagePath?.toUri(),
+                    isLoading = false
+                )
+            }
+        }
     }
 
     init {

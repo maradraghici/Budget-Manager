@@ -2,11 +2,9 @@ package com.example.budgetmanager.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class RegisterRequest(
-    @SerializedName("username")
-    val username: String,
+data class AddUserRequest(
     @SerializedName("phoneNumber")
     val phoneNumber: String,
-    @SerializedName("password")
-    val password: String,
+    @SerializedName("budgetId")
+    val budgetId: Long
 )

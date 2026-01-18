@@ -9,6 +9,7 @@ import com.example.budgetmanager.data.local.Expense
 import com.example.budgetmanager.data.local.User
 import com.example.budgetmanager.data.local.UserPreferences
 import com.example.budgetmanager.data.remote.dto.CreateExpenseRequest
+import com.example.budgetmanager.data.repository.BudgetsRepository
 import com.example.budgetmanager.data.repository.ExpensesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -62,6 +63,7 @@ sealed interface BudgetDetailsEffect {
 class BudgetDetailsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val expensesRepository: ExpensesRepository,
+    private val budgetRepository: BudgetsRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     val id: Long = checkNotNull(savedStateHandle["id"])
@@ -148,13 +150,13 @@ class BudgetDetailsViewModel @Inject constructor(
                 _state.value = _state.value.copy(newUserPhoneNumber = event.phoneNumber)
             }
             is BudgetDetailsEvent.AddUserClicked -> {
-                // Call backend to add the user
+                addUser()
             }
             is BudgetDetailsEvent.RemoveUserPhoneNumberChanged -> {
                 _state.value = _state.value.copy(removeUserPhoneNumber = event.phoneNumber)
             }
             is BudgetDetailsEvent.RemoveUserClicked -> {
-                // Call backend to remove the user
+                removeUser()
             }
 
             is BudgetDetailsEvent.OnSummaryClick -> viewModelScope.launch {
@@ -214,6 +216,30 @@ class BudgetDetailsViewModel @Inject constructor(
             _state.value = _state.value.copy(
                 showDeleteExpense = false,
                 deleteExpenseId = null,
+                isLoading = false
+            )
+        }
+    }
+
+    private fun addUser() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            budgetRepository.addUserToBudget(_state.value.newUserPhoneNumber, id)
+            _state.value = _state.value.copy(
+                showAddUser = false,
+                newUserPhoneNumber = "+",
+                isLoading = false
+            )
+        }
+    }
+
+    private fun removeUser() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            budgetRepository.removeUserFromBudget(_state.value.removeUserPhoneNumber, id)
+            _state.value = _state.value.copy(
+                showRemoveUser = false,
+                removeUserPhoneNumber = "+",
                 isLoading = false
             )
         }
