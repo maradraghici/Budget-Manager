@@ -43,6 +43,12 @@ public class UserService {
     @Autowired
     private SecurityConfig securityConfig;
 
+    @Autowired
+    private BudgetService budgetService;
+
+    @Autowired
+    private ExpendsService expendsService;
+
     public UserRequestVo findByUserId(Long userId) {
 
         User user = userRepository.findById(userId)
@@ -202,12 +208,17 @@ public class UserService {
     }
 
     public void deleteUser(Long userId){
+        budgetService.deleteBudgetByUserId(userId);
+        expendsService.deleteExpendsByUserId(userId);
+
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         // Supprimer tous les tokens liés à ce user
         UserLogin logins = userLoginRepository.findByUser_UserId(userId);
-        userLoginRepository.delete(logins);
+        if (logins != null) {
+            userLoginRepository.delete(logins);
+        }
 
         // Maintenant on peut supprimer l'utilisateur
         userRepository.delete(user);

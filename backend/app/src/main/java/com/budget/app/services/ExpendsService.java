@@ -95,6 +95,14 @@ public class ExpendsService {
         }
     } 
 
+    public void deleteExpendsByUserId(Long userId){
+        List<Expends> e = expendsRepository.findByUser_UserId(userId);
+
+        if (!e.isEmpty()) {
+            expendsRepository.deleteAll(e);
+        }
+    }
+
     // =========================
     // 🔁 Mapper interne
     // =========================
