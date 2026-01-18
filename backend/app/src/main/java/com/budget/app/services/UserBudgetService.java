@@ -81,6 +81,25 @@ public class UserBudgetService {
         
     }
 
+    public void deleteUserPhoneBudget(UserBudgetVo userBudget) {
+        User user = userRepository.findByPhoneNumber(userBudget.getPhoneNumber());
+
+        if (user == null) {
+            throw new IllegalArgumentException("User not found : " + userBudget.getPhoneNumber());
+        }
+
+
+        UserBudget ub = userBudgetRepository.findByUserId_UserIdAndBudgetId_BudgetId(user.getUserId(),userBudget.getBudgetId());
+        
+
+        if (ub != null){
+            userBudgetRepository.delete(ub);
+        } else {
+            throw new IllegalArgumentException("User expends link not found.");
+        }
+        
+    }
+
     private UserBudgetResponseVo toResponseVo(UserBudget ub) {
         return UserBudgetResponseVo.builder()
                 .userBudgetId(ub.getUserBudgetId())
