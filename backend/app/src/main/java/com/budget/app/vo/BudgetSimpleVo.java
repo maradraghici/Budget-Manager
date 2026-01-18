@@ -13,4 +13,5 @@ public class BudgetSimpleVo {
 
     private Long budgetId;
     private String budgetName;
+    private String commentary;
 }

@@ -53,35 +53,11 @@ CREATE TABLE user_expends_table (
 alter table user_expends_table 
 add constraint uq_user_expends unique (user_id, expends_id);
 
-CREATE TABLE invited_table (
-    invited_id SERIAL PRIMARY KEY,
-    invited_name varchar(255),
-    phone_number varchar(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-ALTER TABLE invited_table  
-ADD CONSTRAINT uq_invited_phone UNIQUE (phone_number);
-
-CREATE TABLE invited_budget_table (
-    invited_budget_id SERIAL PRIMARY KEY,
-    invited_id INTEGER REFERENCES invited_table(invited_id),
-    budget_id INTEGER REFERENCES budget_table(budget_id)
-);
-
-CREATE TABLE invited_login (
-    invited_login_id SERIAL PRIMARY KEY,
-    invited_id INTEGER REFERENCES invited_table(invited_id),
-    token VARCHAR(512) NOT NULL,
-    token_expire_time VARCHAR(512) NOT NULL
-);
-
-ALTER TABLE invited_budget_table 
-ADD CONSTRAINT uq_invited_budget UNIQUE (invited_id, budget_id);
-
 ALTER TABLE user_table  
 ADD CONSTRAINT uq_username UNIQUE (user_name);
+
+ALTER TABLE user_table  
+ADD CONSTRAINT uq_user_phone UNIQUE (phone_number);
 
 INSERT INTO user_table (user_name , email , password)
 VALUES ('test', 'test@gmail.com', 'testPassword');

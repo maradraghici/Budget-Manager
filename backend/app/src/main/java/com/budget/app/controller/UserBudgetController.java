@@ -57,6 +57,11 @@ public class UserBudgetController {
     public void deleteUserBudget(@PathVariable Long userBudgetId) {
         userBudgetService.deleteUserBudget(userBudgetId);
     }
+
+    @PostMapping("/userbudget/delete/userPhone")
+    public void deleteUserPhoneBudget(@RequestBody UserBudgetVo userBudget) {
+        userBudgetService.deleteUserPhoneBudget(userBudget);
+    }
     
     
 }

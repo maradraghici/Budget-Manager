@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budgetmanager.R
+import com.example.budgetmanager.ui.screen.splash.LoadingScreen
 import com.example.budgetmanager.ui.theme.BudgetManagerTheme
 
 @Composable
@@ -72,7 +73,11 @@ fun SignUpScreenDestination(
         }
     }
 
-    SignUpScreen(state, vm::onEvent, modifier)
+    if (state.isLoading) {
+        LoadingScreen(modifier)
+    } else {
+        SignUpScreen(state, vm::onEvent, modifier)
+    }
 }
 
 

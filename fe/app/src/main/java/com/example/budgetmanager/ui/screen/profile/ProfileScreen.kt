@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.activity.result.PickVisualMediaRequest
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,16 +53,11 @@ import com.example.budgetmanager.ui.screen.main.MainEvent
 
 @Composable
 fun ProfileScreenDestination(
-    onTitleChanged: (String) -> Unit,
     navigateToAuth: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val vm: ProfileViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
-
-    LaunchedEffect(Unit) {
-        onTitleChanged("My Profile")
-    }
 
     LaunchedEffect(Unit) {
         vm.effect.collect {
@@ -90,12 +87,24 @@ private fun ProfileScreen(
         // Loading Screen
         return
     }
+    val scrollState = rememberScrollState()
+
+    val minHeaderHeight = 0.dp
+    val maxHeaderHeight = 150.dp
+    val headerHeight = (maxHeaderHeight - (scrollState.value * 0.4f).dp).coerceIn(minHeaderHeight, maxHeaderHeight)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(headerHeight)
+            .background(MaterialTheme.colorScheme.primary)
+    )
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -107,6 +116,7 @@ private fun ProfileScreen(
             contentDescription = "Profile Picture",
             contentScale = ContentScale.Crop,
             modifier = Modifier
+                .padding(top = 50.dp)
                 .size(120.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.onPrimary)
@@ -170,6 +180,41 @@ private fun ProfileScreen(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     isError = if (state.phoneNumber.isEmpty()) false else state.phoneNumber.length < 12,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 15.dp)
+                )
+
+                OutlinedTextField(
+                    value = state.oldPassword,
+                    onValueChange = { oldPassword ->
+                        val passwordRegex = Regex("^[A-Za-z0-9,.?!@#\$]*\$")
+                        if (oldPassword.matches(passwordRegex)) {
+                            onEvent(ProfileEvent.OldPasswordChanged(oldPassword))
+                        }
+                    },
+                    label = { Text("Old Password") },
+                    visualTransformation = if (state.oldPasswordVisibility) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
+                    shape = RoundedCornerShape(20.dp),
+                    singleLine = true,
+                    trailingIcon = {
+                        val icon = if (state.oldPasswordVisibility) {
+                            Icons.Outlined.VisibilityOff
+                        } else {
+                            Icons.Outlined.Visibility
+                        }
+                        IconButton(onClick = { onEvent(ProfileEvent.ToggleOldPasswordVisibility) }) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = "Toggle password visibility"
+                            )
+                        }
+                    },
+                    isError = state.password.length < 6 && state.password.isNotEmpty(),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 15.dp)
@@ -252,7 +297,8 @@ private fun ProfileScreen(
                         .height(56.dp),
                     shape = RoundedCornerShape(20.dp),
                     enabled = state.phoneNumber.length == 12 && state.username.isNotBlank() && (
-                            (state.password.length >= 6 && state.secondPassword == state.password) ||
+                            (state.oldPassword.length >= 6 && state.password.length >= 6 &&
+                            state.secondPassword == state.password) ||
                             (state.password.isEmpty()) && (state.username != state.user.username ||
                             state.phoneNumber != state.user.phoneNumber))
                 ) {
