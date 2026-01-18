@@ -2,6 +2,7 @@ package com.example.budgetmanager.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -69,7 +70,10 @@ fun NavGraph(
             MainScreenDestination(
                 navigateToAuth = {
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.MAIN_APP) { inclusive = true }
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
                     }
                 }
             )

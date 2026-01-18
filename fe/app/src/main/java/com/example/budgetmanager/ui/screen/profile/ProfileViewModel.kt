@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.budgetmanager.data.local.User
 import com.example.budgetmanager.data.local.UserPreferences
 import com.example.budgetmanager.data.remote.dto.UserResponse
+import com.example.budgetmanager.data.remote.dto.UserUpdateRequest
 import com.example.budgetmanager.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -95,16 +96,41 @@ class ProfileViewModel @Inject constructor(
                 }
             }
             is ProfileEvent.OnConfirmClick -> {
-                // Call backend to update user
+                viewModelScope.launch {
+                    _state.value = _state.value.copy(isLoading = true)
+
+                    val request = if (_state.value.oldPassword.length >= 6 && _state.value.password.length >= 6
+                        && _state.value.secondPassword == _state.value.password) {
+                        UserUpdateRequest(
+                            username = _state.value.username,
+                            phoneNumber = _state.value.phoneNumber,
+                            oldPassword = _state.value.oldPassword,
+                            newPassword = _state.value.password
+                        )
+                    } else {
+                        UserUpdateRequest(
+                            username = _state.value.username,
+                            phoneNumber = _state.value.phoneNumber
+                        )
+                    }
+
+                    val response = authRepository.updateUser(request)
+                    if (response.isSuccessful) {
+                        loadUser()
+                    }
+                    _state.value = _state.value.copy(
+                        oldPassword = "",
+                        password = "",
+                        secondPassword = "",
+                        isLoading = false
+                    )
+                }
             }
 
             ProfileEvent.OnSignOutClick -> viewModelScope.launch {
                 UserPreferences.clearUserId(context)
                 UserPreferences.clearToken(context)
                 UserPreferences.clearProfileImagePath(context)
-
-                // Call backend to sign out user and delete token
-
                 _effect.emit(ProfileEffect.OnSignOutClick)
             }
 
@@ -156,9 +182,3 @@ class ProfileViewModel @Inject constructor(
         loadUser()
     }
 }
-
-private val userPreview = User(
-    id = 1,
-    username = "Marcel Ciolacu",
-    phoneNumber = "+40187429434"
-)

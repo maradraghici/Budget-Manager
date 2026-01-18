@@ -297,7 +297,8 @@ private fun ProfileScreen(
                         .height(56.dp),
                     shape = RoundedCornerShape(20.dp),
                     enabled = state.phoneNumber.length == 12 && state.username.isNotBlank() && (
-                            (state.password.length >= 6 && state.secondPassword == state.password) ||
+                            (state.oldPassword.length >= 6 && state.password.length >= 6 &&
+                            state.secondPassword == state.password) ||
                             (state.password.isEmpty()) && (state.username != state.user.username ||
                             state.phoneNumber != state.user.phoneNumber))
                 ) {
