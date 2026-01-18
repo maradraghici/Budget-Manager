@@ -12,4 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface ExpendsRepository extends JpaRepository<Expends, Long>{
     public Expends findByExpendsId(Long expendsId);
     public List<Expends> findByBudget_BudgetId(Long budgetId);
+    public List<Expends> findByUser_UserId(Long userId);
 }
