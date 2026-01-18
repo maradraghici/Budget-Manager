@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 public class UserBudgetVo {
-    private Long userId;
+    private String phoneNumber;
     private Long budgetId;
 }

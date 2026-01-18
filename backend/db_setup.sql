@@ -56,6 +56,9 @@ add constraint uq_user_expends unique (user_id, expends_id);
 ALTER TABLE user_table  
 ADD CONSTRAINT uq_username UNIQUE (user_name);
 
+ALTER TABLE user_table  
+ADD CONSTRAINT uq_user_phone UNIQUE (phone_number);
+
 INSERT INTO user_table (user_name , email , password)
 VALUES ('test', 'test@gmail.com', 'testPassword');
 
