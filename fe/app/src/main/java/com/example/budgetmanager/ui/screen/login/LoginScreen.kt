@@ -44,6 +44,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.budgetmanager.R
+import com.example.budgetmanager.ui.screen.signup.SignUpEvent
+import com.example.budgetmanager.ui.screen.splash.LoadingScreen
 
 @Composable
 fun LoginScreenDestination(
@@ -63,7 +65,11 @@ fun LoginScreenDestination(
         }
     }
 
-    LoginScreen(state, vm::onEvent, modifier)
+    if (state.isLoading) {
+        LoadingScreen(modifier)
+    } else {
+        LoginScreen(state, vm::onEvent, modifier)
+    }
 }
 
 
@@ -150,39 +156,17 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(50.dp))
 
-                    var phoneFieldValue by remember {
-                        mutableStateOf(
-                            TextFieldValue(
-                                text = state.phoneNumber,
-                                selection = TextRange(state.phoneNumber.length)
-                            )
-                        )
-                    }
-
                     OutlinedTextField(
-                        value = phoneFieldValue,
-                        onValueChange = { newValue ->
-                            var phone = newValue.text
-
-                            if (phone.isNotEmpty() && !phone.startsWith("+")) {
-                                phone = "+$phone"
+                        value = state.username,
+                        onValueChange = { newUsername ->
+                            val usernameRegex = Regex("^[A-Za-z0-9. ]*\$")
+                            if (newUsername.length <= 20 && newUsername.matches(usernameRegex)) {
+                                onEvent(LoginEvent.UsernameChanged(newUsername))
                             }
-
-                            val phoneRegex = Regex("^\\+?\\d{0,11}$")
-                            if (!phone.matches(phoneRegex)) return@OutlinedTextField
-
-                            phoneFieldValue = TextFieldValue(
-                                text = phone,
-                                selection = TextRange(phone.length)
-                            )
-
-                            onEvent(LoginEvent.PhoneNumberChanged(phone))
                         },
-                        label = { Text("Phone Number") },
+                        label = { Text("Username") },
                         shape = RoundedCornerShape(20.dp),
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                        isError = if (state.phoneNumber.isEmpty()) false else state.phoneNumber.length < 12,
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -221,16 +205,6 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(15.dp))
-
-                    Text(
-                        text = "Forgot your password ?",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.secondary
-                        ),
-                        modifier = Modifier.align(Alignment.End)
-                    )
-
                     Spacer(modifier = Modifier.height(54.dp))
 
                     Button(
@@ -239,7 +213,7 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .height(56.dp),
                         shape = RoundedCornerShape(20.dp),
-                        enabled = state.phoneNumber.length == 12 && state.password.length >= 6
+                        enabled = state.username.isNotBlank() && state.password.length >= 6
 
                     ) {
                         Text(

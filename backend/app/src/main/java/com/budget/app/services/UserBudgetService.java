@@ -51,10 +51,11 @@ public class UserBudgetService {
 
     public UserBudget createUserBudget(UserBudgetVo userBudget) {
         User user = null;
-        if (userBudget.getUserId() != null) {
-            user = userRepository.findById(userBudget.getUserId())
-                    .orElseThrow(() ->
-                            new IllegalArgumentException("User not found: " + userBudget.getUserId()));
+        if (userBudget.getPhoneNumber() != null) {
+            user = userRepository.findByPhoneNumber(userBudget.getPhoneNumber());
+            if (user == null){
+                throw new IllegalArgumentException("User not found: " + userBudget.getPhoneNumber());
+            }
         }
         Budget budget = null;
         if (userBudget.getBudgetId() != null) {
@@ -64,8 +65,8 @@ public class UserBudgetService {
         }
 
         UserBudget newUserBudget = UserBudget.builder()
-                .userId(user) // Set userId appropriately
-                .budgetId(budget) // Set budgetId appropriately
+                .userId(user)
+                .budgetId(budget)
                 .build();
 
         return userBudgetRepository.save(newUserBudget);
@@ -76,6 +77,25 @@ public class UserBudgetService {
             userBudgetRepository.deleteById(userBudgetId);
         } else {
             throw new IllegalArgumentException("User expends link not found: " + userBudgetId);
+        }
+        
+    }
+
+    public void deleteUserPhoneBudget(UserBudgetVo userBudget) {
+        User user = userRepository.findByPhoneNumber(userBudget.getPhoneNumber());
+
+        if (user == null) {
+            throw new IllegalArgumentException("User not found : " + userBudget.getPhoneNumber());
+        }
+
+
+        UserBudget ub = userBudgetRepository.findByUserId_UserIdAndBudgetId_BudgetId(user.getUserId(),userBudget.getBudgetId());
+        
+
+        if (ub != null){
+            userBudgetRepository.delete(ub);
+        } else {
+            throw new IllegalArgumentException("User expends link not found.");
         }
         
     }
@@ -95,6 +115,7 @@ public class UserBudgetService {
                         BudgetSimpleVo.builder()
                                 .budgetId(ub.getBudgetId().getBudgetId())
                                 .budgetName(ub.getBudgetId().getBudgetName())
+                                .commentary(ub.getBudgetId().getCommentary())
                                 .build()
                 )
                 .build();

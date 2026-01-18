@@ -16,6 +16,7 @@ object UserPreferences {
     private object PreferenceKeys {
         val USER_ID = longPreferencesKey("user_id")
         val PROFILE_IMAGE_PATH_KEY = stringPreferencesKey("profile_image_path")
+        val TOKEN = stringPreferencesKey("token")
     }
 
     fun userIdFlow(context: Context): Flow<Long?> =
@@ -30,6 +31,21 @@ object UserPreferences {
     suspend fun clearUserId(context: Context) {
         context.dataStore.edit { prefs ->
             prefs.remove(PreferenceKeys.USER_ID)
+        }
+    }
+
+    fun tokenFlow(context: Context): Flow<String?> =
+        context.dataStore.data.map { preferences -> preferences[PreferenceKeys.TOKEN] }
+
+    suspend fun saveToken(context: Context, token: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.TOKEN] = token
+        }
+    }
+
+    suspend fun clearToken(context: Context) {
+        context.dataStore.edit { prefs ->
+            prefs.remove(PreferenceKeys.TOKEN)
         }
     }
 

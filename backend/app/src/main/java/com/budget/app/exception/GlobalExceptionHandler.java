@@ -54,7 +54,13 @@ public class GlobalExceptionHandler {
                 message = "Email already exists";
             } else if (cause.contains("uq_phone_number")) {
                 message = "Phone number already exists";
+            } else if (cause.contains("uq_user_phone")) {
+                message = "Phone number already exists";
+            } else if (cause.contains("uq_user_budget")) {
+                message = "Link for this user/budget already exists";
             }
+
+            
         }
 
         return ResponseEntity

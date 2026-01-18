@@ -1,6 +1,7 @@
 package com.example.budgetmanager.ui.navigation
 
 object Routes {
+    const val SPLASH = "splash"
     const val LOGIN = "login"
     const val SIGNUP = "signup"
 
@@ -15,6 +16,6 @@ object Routes {
     const val BUDGET_DETAILS = "budget_details"
     const val SUMMARY = "summary"
 
-    fun budgetDetails(id: Long): String = "$BUDGET_DETAILS/$id"
+    fun budgetDetails(id: Long, title:String): String = "$BUDGET_DETAILS/$id/$title"
     fun summary(id: Long): String = "$SUMMARY/$id"
 }

@@ -2,6 +2,7 @@ package com.example.budgetmanager.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,11 +11,12 @@ import com.example.budgetmanager.ui.screen.home.HomeScreenDestination
 import com.example.budgetmanager.ui.screen.login.LoginScreenDestination
 import com.example.budgetmanager.ui.screen.main.MainScreenDestination
 import com.example.budgetmanager.ui.screen.signup.SignUpScreenDestination
+import com.example.budgetmanager.ui.screen.splash.SplashScreenDestination
 
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
-    startDestination: String = Routes.LOGIN
+    startDestination: String = Routes.SPLASH
 ) {
     val navController: NavHostController = rememberNavController()
 
@@ -22,6 +24,17 @@ fun NavGraph(
         navController = navController,
         startDestination = startDestination
     ) {
+
+        composable(Routes.SPLASH) {
+            SplashScreenDestination(
+                onNavigate = { decidedRoute ->
+                    navController.navigate(decidedRoute) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                },
+                modifier = modifier
+            )
+        }
 
         composable(Routes.LOGIN) {
             LoginScreenDestination(
@@ -57,7 +70,10 @@ fun NavGraph(
             MainScreenDestination(
                 navigateToAuth = {
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.MAIN_APP) { inclusive = true }
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
                     }
                 }
             )
