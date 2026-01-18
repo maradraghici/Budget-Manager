@@ -1,0 +1,28 @@
+name: Deploy to Raspberry Pi
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: SSH into Raspberry Pi and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: XX.XX.XX.XX
+          username: Ath
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/Budget-Manager
+            git fetch
+            git reset --hard origin/master
+            cd backend
+            docker-compose down -v
+            docker-compose up -d --build
