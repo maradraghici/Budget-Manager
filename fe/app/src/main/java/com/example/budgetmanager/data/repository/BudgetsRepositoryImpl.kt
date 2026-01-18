@@ -1,8 +1,10 @@
 package com.example.budgetmanager.data.repository
 
 import com.example.budgetmanager.data.local.Budget
+import com.example.budgetmanager.data.local.User
 import com.example.budgetmanager.data.mapper.toBudgetMember
 import com.example.budgetmanager.data.mapper.toBudgetOwner
+import com.example.budgetmanager.data.mapper.toUser
 import com.example.budgetmanager.data.remote.BudgetsApiService
 import com.example.budgetmanager.data.remote.dto.AddUserRequest
 import com.example.budgetmanager.data.remote.dto.CreateBudgetRequest
@@ -28,6 +30,25 @@ class BudgetsRepositoryImpl @Inject constructor(
         if (response.isSuccessful && response.body() != null) {
             val budgets = response.body()!!
             return Response.success(budgets.map { it.toBudgetMember() })
+        } else {
+            return Response.success(emptyList())
+        }
+    }
+
+    override suspend fun getBudgetOwnerById(budgetId: Long): Response<User> {
+        val response = budgetsApiService.getBudgetOwnerById(budgetId)
+        return if (response.isSuccessful && response.body() != null) {
+            Response.success(response.body()!!.user.toUser())
+        } else {
+            Response.error(response.code(), response.errorBody()!!)
+        }
+    }
+
+    override suspend fun getBudgetMembersById(budgetId: Long): Response<List<User>> {
+        val response = budgetsApiService.getBudgetMembersById(budgetId)
+        if (response.isSuccessful && response.body() != null) {
+            val budgets = response.body()!!
+            return Response.success(budgets.map { it.user.toUser() })
         } else {
             return Response.success(emptyList())
         }

@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.budgetmanager.ui.screen.main.MainEvent
+import com.example.budgetmanager.ui.screen.splash.LoadingScreen
 
 @Composable
 fun SummaryScreenDestination(
@@ -35,7 +35,11 @@ fun SummaryScreenDestination(
         onTitleChanged("Summary")
     }
 
-    SummaryScreen(state, modifier)
+    if (state.isLoading) {
+        LoadingScreen(modifier)
+    } else {
+        SummaryScreen(state, modifier)
+    }
 }
 
 @Composable
