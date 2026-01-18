@@ -177,6 +177,14 @@ private fun BudgetDetailsScreen(
                     onEvent(BudgetDetailsEvent.NewExpensePriceChanged(it))
                 }
             },
+            thirdField = true,
+            thirdFieldLabel = "Description",
+            thirdFieldValue = state.newExpenseDescription,
+            thirdFieldValueChange = {
+                if (state.newExpenseDescription.length < 100) {
+                    onEvent(BudgetDetailsEvent.NewExpenseDescriptionChanged(it))
+                }
+            },
             secondFieldKeyboardType = KeyboardType.Decimal
         )
     }

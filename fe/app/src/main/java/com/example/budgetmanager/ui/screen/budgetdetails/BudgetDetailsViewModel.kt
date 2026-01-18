@@ -32,6 +32,7 @@ data class BudgetDetailsState(
     val deleteExpenseId: Long? = null,
     val newExpenseName: String = "",
     val newExpensePrice: String = "",
+    val newExpenseDescription: String = "",
     val newUserPhoneNumber: String = "+",
     val removeUserPhoneNumber: String = "+",
     val isLoading: Boolean = false,
@@ -44,6 +45,7 @@ sealed interface BudgetDetailsEvent {
     data class OnExpenseClicked(val id: Long, val ownerId: Long): BudgetDetailsEvent
     data class NewExpenseNameChanged(val name: String) : BudgetDetailsEvent
     data class NewExpensePriceChanged(val price: String) : BudgetDetailsEvent
+    data class NewExpenseDescriptionChanged(val description: String) : BudgetDetailsEvent
     data class NewUserPhoneNumberChanged(val phoneNumber: String) : BudgetDetailsEvent
     data class RemoveUserPhoneNumberChanged(val phoneNumber: String) : BudgetDetailsEvent
     data object OptionsClicked: BudgetDetailsEvent
@@ -145,6 +147,9 @@ class BudgetDetailsViewModel @Inject constructor(
             is BudgetDetailsEvent.NewExpensePriceChanged -> {
                 _state.value = _state.value.copy(newExpensePrice = event.price)
             }
+            is BudgetDetailsEvent.NewExpenseDescriptionChanged -> {
+                _state.value = _state.value.copy(newExpenseDescription = event.description)
+            }
             is BudgetDetailsEvent.NewUserPhoneNumberChanged -> {
                 _state.value = _state.value.copy(newUserPhoneNumber = event.phoneNumber)
             }
@@ -194,6 +199,7 @@ class BudgetDetailsViewModel @Inject constructor(
             val request = CreateExpenseRequest(
                 name = _state.value.newExpenseName,
                 amount = _state.value.newExpensePrice.toDouble(),
+                commentary = _state.value.newExpenseDescription,
                 budgetId = id,
                 userId = _state.value.userId,
             )

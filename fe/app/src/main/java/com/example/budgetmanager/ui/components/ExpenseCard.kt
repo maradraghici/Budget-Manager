@@ -42,7 +42,7 @@ fun ExpenseCard(
                 .padding(16.dp)
         ) {
             Row(
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 2.dp)
             ) {
                 Text(
                     text = expense.name,
@@ -59,6 +59,14 @@ fun ExpenseCard(
                     ),
                 )
             }
+
+            Text(
+                text = expense.description,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.tertiary
+                ),
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
             Row {
                 Text(

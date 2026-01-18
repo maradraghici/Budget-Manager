@@ -9,6 +9,8 @@ data class ExpenseResponse(
     val name: String,
     @SerializedName("amount")
     val amount: Double,
+    @SerializedName("commentary")
+    val description: String,
     @SerializedName("paidBy")
     val paidBy: User,
     @SerializedName("createdAt")
