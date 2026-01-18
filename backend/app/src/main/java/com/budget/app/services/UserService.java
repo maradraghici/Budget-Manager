@@ -52,6 +52,7 @@ public class UserService {
         return UserRequestVo.builder()
                 .username(user.getUserName())
                 .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
                 .build();
         }
 

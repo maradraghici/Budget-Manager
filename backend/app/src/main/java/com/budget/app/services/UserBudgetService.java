@@ -51,10 +51,11 @@ public class UserBudgetService {
 
     public UserBudget createUserBudget(UserBudgetVo userBudget) {
         User user = null;
-        if (userBudget.getUserId() != null) {
-            user = userRepository.findById(userBudget.getUserId())
-                    .orElseThrow(() ->
-                            new IllegalArgumentException("User not found: " + userBudget.getUserId()));
+        if (userBudget.getPhoneNumber() != null) {
+            user = userRepository.findByPhoneNumber(userBudget.getPhoneNumber());
+            if (user == null){
+                throw new IllegalArgumentException("User not found: " + userBudget.getPhoneNumber());
+            }
         }
         Budget budget = null;
         if (userBudget.getBudgetId() != null) {
@@ -64,8 +65,8 @@ public class UserBudgetService {
         }
 
         UserBudget newUserBudget = UserBudget.builder()
-                .userId(user) // Set userId appropriately
-                .budgetId(budget) // Set budgetId appropriately
+                .userId(user)
+                .budgetId(budget)
                 .build();
 
         return userBudgetRepository.save(newUserBudget);
