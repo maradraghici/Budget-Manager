@@ -76,7 +76,7 @@ class LoginViewModel @Inject constructor(
                             UserPreferences.saveToken(context, responseBody.token)
                             _effect.emit(LoginEffect.OnLoginSuccess)
                         } else if (!response.isSuccessful) {
-                            _effect.emit(LoginEffect.OnError(response.message()))
+                            _effect.emit(LoginEffect.OnError("Invalid credentials"))
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()

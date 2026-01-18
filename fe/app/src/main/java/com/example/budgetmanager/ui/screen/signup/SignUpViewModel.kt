@@ -97,7 +97,7 @@ class SignUpViewModel @Inject constructor(
                             UserPreferences.saveToken(context, responseBody.token)
                             _effect.emit(SignUpEffect.OnSignUpSuccess)
                         } else if (!response.isSuccessful) {
-                            _effect.emit(SignUpEffect.OnError(response.message()))
+                            _effect.emit(SignUpEffect.OnError("Invalid credentials"))
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
