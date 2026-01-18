@@ -1,12 +1,14 @@
 package com.example.budgetmanager.ui.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +25,7 @@ import com.example.budgetmanager.data.local.Expense
 @Composable
 fun ExpenseCard(
     expense: Expense,
+    showDelete: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -32,7 +35,6 @@ fun ExpenseCard(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = modifier
-            .clickable{ onClick() }
     ) {
         Column(
             modifier = Modifier
@@ -95,6 +97,27 @@ fun ExpenseCard(
                         color = MaterialTheme.colorScheme.tertiary
                     ),
                 )
+            }
+            if (showDelete) {
+                Button(
+                    onClick = { onClick() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.inversePrimary
+                    ),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 8.dp)
+                        .height(30.dp)
+                ) {
+                    Text(
+                        text = "Delete",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+                }
             }
         }
     }

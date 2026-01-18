@@ -1,5 +1,6 @@
 package com.example.budgetmanager.ui.screen.profile
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,6 +52,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.budgetmanager.R
 import com.example.budgetmanager.ui.screen.main.MainEvent
+import com.example.budgetmanager.ui.screen.splash.LoadingScreen
 
 @Composable
 fun ProfileScreenDestination(
@@ -58,6 +61,7 @@ fun ProfileScreenDestination(
 ) {
     val vm: ProfileViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         vm.effect.collect {
@@ -65,11 +69,18 @@ fun ProfileScreenDestination(
                 ProfileEffect.OnSignOutClick -> {
                     navigateToAuth()
                 }
+                is ProfileEffect.OnProfileChanged -> {
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
 
-    ProfileScreen(state, vm::onEvent, modifier = modifier)
+    if (state.isLoading) {
+        LoadingScreen(modifier)
+    } else {
+        ProfileScreen(state, vm::onEvent, modifier = modifier)
+    }
 }
 
 @Composable
@@ -82,11 +93,6 @@ private fun ProfileScreen(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> onEvent(ProfileEvent.ProfileImageChanged(uri)) }
     )
-
-    if (state.user == null) {
-        // Loading Screen
-        return
-    }
     val scrollState = rememberScrollState()
 
     val minHeaderHeight = 0.dp
@@ -214,7 +220,7 @@ private fun ProfileScreen(
                             )
                         }
                     },
-                    isError = state.password.length < 6 && state.password.isNotEmpty(),
+                    isError = state.oldPassword.length < 6 && state.oldPassword.isNotEmpty(),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 15.dp)
@@ -286,6 +292,15 @@ private fun ProfileScreen(
                     },
                     isError = state.secondPassword.isNotEmpty() && state.secondPassword.isNotEmpty() &&
                             state.secondPassword != state.password,
+                    supportingText = {
+                        if (state.secondPassword.isNotEmpty() && state.password.isNotEmpty() &&
+                            state.secondPassword != state.password) {
+                            Text(
+                                text = "Passwords do not match",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
 

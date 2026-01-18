@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.budgetmanager.data.local.User
 import com.example.budgetmanager.data.local.UserPreferences
 import com.example.budgetmanager.data.remote.dto.UserResponse
 import com.example.budgetmanager.data.remote.dto.UserUpdateRequest
@@ -22,7 +21,7 @@ import java.io.File
 import javax.inject.Inject
 
 data class ProfileState(
-    val user: UserResponse? = null,
+    val user: UserResponse = UserResponse("", ""),
     val username: String = "",
     val phoneNumber: String = "",
     val oldPassword: String = "",
@@ -51,6 +50,7 @@ sealed interface ProfileEvent {
 
 sealed interface ProfileEffect {
     data object OnSignOutClick : ProfileEffect
+    data class OnProfileChanged(val message: String) : ProfileEffect
 }
 
 @HiltViewModel
@@ -116,7 +116,10 @@ class ProfileViewModel @Inject constructor(
 
                     val response = authRepository.updateUser(request)
                     if (response.isSuccessful) {
+                        _effect.emit(ProfileEffect.OnProfileChanged("Profile updated successfully"))
                         loadUser()
+                    } else {
+                        _effect.emit(ProfileEffect.OnProfileChanged("Failed to update profile"))
                     }
                     _state.value = _state.value.copy(
                         oldPassword = "",

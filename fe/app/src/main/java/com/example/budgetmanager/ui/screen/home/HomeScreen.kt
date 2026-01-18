@@ -1,5 +1,6 @@
 package com.example.budgetmanager.ui.screen.home
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -42,12 +44,16 @@ fun HomeScreenDestination(
 ) {
     val vm: HomeViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
             when (effect) {
                 is HomeEffect.OnBudgetClick -> {
                     onBudgetClick(effect.id, effect.title)
+                }
+                is HomeEffect.OnBudgetsChanged -> {
+                    Toast.makeText(context, effect.meessage, Toast.LENGTH_SHORT).show()
                 }
             }
         }
