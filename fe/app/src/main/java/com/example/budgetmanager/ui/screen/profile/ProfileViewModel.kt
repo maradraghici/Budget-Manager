@@ -22,8 +22,10 @@ data class ProfileState(
     val user: User? = null,
     val username: String = "",
     val phoneNumber: String = "",
+    val oldPassword: String = "",
     val password: String = "",
     val secondPassword: String = "",
+    val oldPasswordVisibility: Boolean = false,
     val passwordVisibility: Boolean = false,
     val secondPasswordVisibility: Boolean = false,
     val imageUri: Uri? = null
@@ -32,8 +34,10 @@ data class ProfileState(
 sealed interface ProfileEvent {
     data class UsernameChanged(val username: String) : ProfileEvent
     data class PhoneNumberChanged(val phoneNumber: String) : ProfileEvent
+    data class OldPasswordChanged(val password: String) : ProfileEvent
     data class PasswordChanged(val password: String) : ProfileEvent
     data class SecondPasswordChanged(val password: String) : ProfileEvent
+    data object ToggleOldPasswordVisibility : ProfileEvent
     data object TogglePasswordVisibility : ProfileEvent
     data object ToggleSecondPasswordVisibility : ProfileEvent
     data class ProfileImageChanged(val uri: Uri?) : ProfileEvent
@@ -98,6 +102,14 @@ class ProfileViewModel @Inject constructor(
                 // Call backend to sign out user and delete token
 
                 _effect.emit(ProfileEffect.OnSignOutClick)
+            }
+
+            is ProfileEvent.OldPasswordChanged -> {
+                _state.value = _state.value.copy(oldPassword = event.password)
+            }
+            is ProfileEvent.ToggleOldPasswordVisibility -> {
+                _state.value =
+                    _state.value.copy(oldPasswordVisibility = !_state.value.oldPasswordVisibility)
             }
         }
     }
