@@ -1,0 +1,4 @@
+package com.example.budgetmanager.data.remote.dto
+
+class CreateExpenseRequest {
+}
