@@ -134,6 +134,7 @@ public class UserBudgetService {
                         BudgetSimpleVo.builder()
                                 .budgetId(ub.getBudgetId().getBudgetId())
                                 .budgetName(ub.getBudgetId().getBudgetName())
+                                .commentary(ub.getBudgetId().getCommentary())
                                 .build()
                 )
                 .build();

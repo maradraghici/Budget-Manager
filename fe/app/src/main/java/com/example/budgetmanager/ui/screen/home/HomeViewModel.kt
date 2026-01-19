@@ -35,6 +35,7 @@ sealed interface HomeEvent {
     data object CreateBudgetClicked : HomeEvent
     data object DeleteBudgetClicked : HomeEvent
     data class OnBudgetHold(val id: Long) : HomeEvent
+    data object OnRefresh : HomeEvent
 
     data class OnBudgetClick(val id: Long, val title: String) : HomeEvent
 }
@@ -97,6 +98,9 @@ class HomeViewModel @Inject constructor(
                         deleteBudgetId = event.id
                     )
                 }
+            }
+            is HomeEvent.OnRefresh -> {
+                loadBudgets()
             }
 
             is HomeEvent.OnBudgetClick -> viewModelScope.launch {

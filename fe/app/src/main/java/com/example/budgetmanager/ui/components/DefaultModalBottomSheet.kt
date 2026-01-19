@@ -46,7 +46,9 @@ fun DefaultModalBottomSheet(
     singleField: Boolean = false,
     thirdField: Boolean = false,
 ) {
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
     val scope = rememberCoroutineScope()
 
     ModalBottomSheet(

@@ -57,6 +57,7 @@ sealed interface BudgetDetailsEvent {
     data object AddUserClicked : BudgetDetailsEvent
     data object RemoveUserClicked : BudgetDetailsEvent
     data object OnSummaryClick : BudgetDetailsEvent
+    data object OnRefresh : BudgetDetailsEvent
 }
 
 sealed interface BudgetDetailsEffect {
@@ -163,6 +164,9 @@ class BudgetDetailsViewModel @Inject constructor(
             }
             is BudgetDetailsEvent.RemoveUserClicked -> {
                 removeUser()
+            }
+            is BudgetDetailsEvent.OnRefresh -> {
+                loadBudgetDetails()
             }
 
             is BudgetDetailsEvent.OnSummaryClick -> viewModelScope.launch {
