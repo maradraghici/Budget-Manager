@@ -37,9 +37,14 @@ fun DefaultModalBottomSheet(
     secondFieldLabel: String? = null,
     secondFieldValue: String? = null,
     secondFieldValueChange: (String) -> Unit = { },
+    thirdFieldLabel: String? = null,
+    thirdFieldValue: String? = null,
+    thirdFieldValueChange: (String) -> Unit = { },
     firstFieldKeyboardType: KeyboardType = KeyboardOptions.Default.keyboardType,
     secondFieldKeyboardType: KeyboardType = KeyboardOptions.Default.keyboardType,
-    singleField: Boolean = false
+    thirdFieldKeyboardType: KeyboardType = KeyboardOptions.Default.keyboardType,
+    singleField: Boolean = false,
+    thirdField: Boolean = false,
 ) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
@@ -81,6 +86,18 @@ fun DefaultModalBottomSheet(
                     shape = RoundedCornerShape(20.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = secondFieldKeyboardType),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
+                )
+            }
+
+            if (thirdField && thirdFieldLabel != null && thirdFieldValue != null) {
+                OutlinedTextField(
+                    value = thirdFieldValue,
+                    onValueChange = { thirdFieldValueChange(it) },
+                    label = { Text(thirdFieldLabel) },
+                    shape = RoundedCornerShape(20.dp),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = thirdFieldKeyboardType),
                     modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
                 )
             }

@@ -41,6 +41,7 @@ sealed interface HomeEvent {
 
 sealed interface HomeEffect {
     data class OnBudgetClick(val id: Long, val title: String) : HomeEffect
+    data class OnBudgetsChanged(val meessage: String) : HomeEffect
 }
 
 
@@ -140,7 +141,10 @@ class HomeViewModel @Inject constructor(
                 )
                 val response = budgetsRepository.createBudget(request)
                 if (response.isSuccessful) {
+                    _effect.emit(HomeEffect.OnBudgetsChanged("Budget created successfully"))
                     loadBudgets()
+                } else {
+                    _effect.emit(HomeEffect.OnBudgetsChanged("Failed to create budget"))
                 }
             }
             _state.value = _state.value.copy(isLoading = false)
@@ -153,8 +157,12 @@ class HomeViewModel @Inject constructor(
 
             _state.value.deleteBudgetId?.let {
                 val response = budgetsRepository.deleteBudget(it)
-                if (response.isSuccessful)
+                if (response.isSuccessful) {
+                    _effect.emit(HomeEffect.OnBudgetsChanged("Budget deleted successfully"))
                     loadBudgets()
+                } else {
+                    _effect.emit(HomeEffect.OnBudgetsChanged("Failed to delete budget"))
+                }
             }
 
             _state.value = _state.value.copy(isLoading = false)

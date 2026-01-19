@@ -32,9 +32,11 @@ data class BudgetDetailsState(
     val deleteExpenseId: Long? = null,
     val newExpenseName: String = "",
     val newExpensePrice: String = "",
+    val newExpenseDescription: String = "",
     val newUserPhoneNumber: String = "+",
     val removeUserPhoneNumber: String = "+",
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val userId: Long = -1
 )
 
 sealed interface BudgetDetailsEvent {
@@ -43,6 +45,7 @@ sealed interface BudgetDetailsEvent {
     data class OnExpenseClicked(val id: Long, val ownerId: Long): BudgetDetailsEvent
     data class NewExpenseNameChanged(val name: String) : BudgetDetailsEvent
     data class NewExpensePriceChanged(val price: String) : BudgetDetailsEvent
+    data class NewExpenseDescriptionChanged(val description: String) : BudgetDetailsEvent
     data class NewUserPhoneNumberChanged(val phoneNumber: String) : BudgetDetailsEvent
     data class RemoveUserPhoneNumberChanged(val phoneNumber: String) : BudgetDetailsEvent
     data object OptionsClicked: BudgetDetailsEvent
@@ -57,6 +60,7 @@ sealed interface BudgetDetailsEvent {
 
 sealed interface BudgetDetailsEffect {
     data class OnSummaryClick(val id: Long) : BudgetDetailsEffect
+    data class OnBudgetDetailsChanged(val message: String): BudgetDetailsEffect
 }
 
 @HiltViewModel
@@ -87,13 +91,10 @@ class BudgetDetailsViewModel @Inject constructor(
                 )
             }
             is BudgetDetailsEvent.OnExpenseClicked -> viewModelScope.launch {
-                val storedUserId = UserPreferences.userIdFlow(context).first()
-                if(storedUserId == event.ownerId) {
-                    _state.value = _state.value.copy(
-                        showDeleteExpense = true,
-                        deleteExpenseId = event.id
-                    )
-                }
+                _state.value = _state.value.copy(
+                    showDeleteExpense = true,
+                    deleteExpenseId = event.id
+                )
             }
             is BudgetDetailsEvent.OptionsClicked -> {
                 _state.value = _state.value.copy(
@@ -146,6 +147,9 @@ class BudgetDetailsViewModel @Inject constructor(
             is BudgetDetailsEvent.NewExpensePriceChanged -> {
                 _state.value = _state.value.copy(newExpensePrice = event.price)
             }
+            is BudgetDetailsEvent.NewExpenseDescriptionChanged -> {
+                _state.value = _state.value.copy(newExpenseDescription = event.description)
+            }
             is BudgetDetailsEvent.NewUserPhoneNumberChanged -> {
                 _state.value = _state.value.copy(newUserPhoneNumber = event.phoneNumber)
             }
@@ -168,6 +172,11 @@ class BudgetDetailsViewModel @Inject constructor(
     private fun loadBudgetDetails() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
+            val userId = UserPreferences.userIdFlow(context).first()
+            userId?.let {
+                _state.value = _state.value.copy(userId = it)
+            }
+
             val response = expensesRepository.getExpenses(id)
             if (response.isSuccessful && response.body() != null) {
                 _state.value = _state.value.copy(
@@ -187,19 +196,19 @@ class BudgetDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
 
-            val userId = UserPreferences.userIdFlow(context).first()
-
-            userId?.let {
-                val request = CreateExpenseRequest(
-                    name = _state.value.newExpenseName,
-                    amount = _state.value.newExpensePrice.toDouble(),
-                    budgetId = id,
-                    userId = it,
-                )
-                val response = expensesRepository.createExpense(request)
-                if (response.isSuccessful) {
-                    loadBudgetDetails()
-                }
+            val request = CreateExpenseRequest(
+                name = _state.value.newExpenseName,
+                amount = _state.value.newExpensePrice.toDouble(),
+                commentary = _state.value.newExpenseDescription,
+                budgetId = id,
+                userId = _state.value.userId,
+            )
+            val response = expensesRepository.createExpense(request)
+            if (response.isSuccessful) {
+                _effect.emit(BudgetDetailsEffect.OnBudgetDetailsChanged("Expense added successfully"))
+                loadBudgetDetails()
+            } else {
+                _effect.emit(BudgetDetailsEffect.OnBudgetDetailsChanged("Failed to add expense"))
             }
             _state.value = _state.value.copy(isLoading = false)
         }
@@ -211,7 +220,10 @@ class BudgetDetailsViewModel @Inject constructor(
 
             val response = expensesRepository.deleteExpense(_state.value.deleteExpenseId!!)
             if (response.isSuccessful) {
+                _effect.emit(BudgetDetailsEffect.OnBudgetDetailsChanged("Expense deleted successfully"))
                 loadBudgetDetails()
+            } else {
+                _effect.emit(BudgetDetailsEffect.OnBudgetDetailsChanged("Failed to delete expense"))
             }
             _state.value = _state.value.copy(
                 showDeleteExpense = false,
@@ -224,7 +236,13 @@ class BudgetDetailsViewModel @Inject constructor(
     private fun addUser() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
-            budgetRepository.addUserToBudget(_state.value.newUserPhoneNumber, id)
+            val response = budgetRepository.addUserToBudget(_state.value.newUserPhoneNumber, id)
+            if (response.isSuccessful) {
+                _effect.emit(BudgetDetailsEffect.OnBudgetDetailsChanged("User added successfully"))
+            } else {
+                _effect.emit(BudgetDetailsEffect.OnBudgetDetailsChanged("Failed to add user"))
+            }
+
             _state.value = _state.value.copy(
                 showAddUser = false,
                 newUserPhoneNumber = "+",
@@ -236,7 +254,13 @@ class BudgetDetailsViewModel @Inject constructor(
     private fun removeUser() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
-            budgetRepository.removeUserFromBudget(_state.value.removeUserPhoneNumber, id)
+            val response = budgetRepository.removeUserFromBudget(_state.value.removeUserPhoneNumber, id)
+            if (response.isSuccessful) {
+                _effect.emit(BudgetDetailsEffect.OnBudgetDetailsChanged("User removed successfully"))
+            } else {
+                _effect.emit(BudgetDetailsEffect.OnBudgetDetailsChanged("Failed to remove user"))
+            }
+
             _state.value = _state.value.copy(
                 showRemoveUser = false,
                 removeUserPhoneNumber = "+",

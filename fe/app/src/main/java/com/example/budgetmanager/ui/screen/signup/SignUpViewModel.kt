@@ -42,6 +42,7 @@ sealed interface SignUpEvent {
 sealed interface SignUpEffect {
     data object OnSignUpSuccess : SignUpEffect
     data object OnLoginClick : SignUpEffect
+    data class OnError(val error: String): SignUpEffect
 }
 
 @HiltViewModel
@@ -95,6 +96,8 @@ class SignUpViewModel @Inject constructor(
                             UserPreferences.saveUserId(context, responseBody.userId)
                             UserPreferences.saveToken(context, responseBody.token)
                             _effect.emit(SignUpEffect.OnSignUpSuccess)
+                        } else if (!response.isSuccessful) {
+                            _effect.emit(SignUpEffect.OnError("Invalid credentials"))
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
