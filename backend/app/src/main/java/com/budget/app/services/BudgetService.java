@@ -1,9 +1,11 @@
 package com.budget.app.services;
 
 import com.budget.app.model.Budget;
+import com.budget.app.model.Expends;
 import com.budget.app.model.User;
 import com.budget.app.model.UserBudget;
 import com.budget.app.repository.BudgetRepository;
+import com.budget.app.repository.ExpendsRepository;
 import com.budget.app.repository.UserBudgetRepository;
 import com.budget.app.repository.UserRepository;
 import com.budget.app.vo.BudgetResponseVo;
@@ -19,11 +21,13 @@ public class BudgetService {
     private final BudgetRepository budgetRepository;
     private final UserRepository userRepository;
     private final UserBudgetRepository userBudgetRepository;
+    private final ExpendsRepository expendsRepository;
 
-    public BudgetService(BudgetRepository budgetRepository, UserRepository userRepository, UserBudgetRepository userBudgetRepository) {
+    public BudgetService(BudgetRepository budgetRepository, UserRepository userRepository, UserBudgetRepository userBudgetRepository, ExpendsRepository expendsRepository) {
         this.budgetRepository = budgetRepository;
         this.userRepository = userRepository;
         this.userBudgetRepository = userBudgetRepository;
+        this.expendsRepository = expendsRepository;
     }
 
     public BudgetResponseVo getBudgetById(Long budgetId) {
@@ -69,6 +73,12 @@ public class BudgetService {
 
         if (!ub.isEmpty()) {
             userBudgetRepository.deleteAll(ub);
+        }
+
+        List<Expends> e = expendsRepository.findByBudget_BudgetId(budgetId);
+
+        if (!e.isEmpty()) {
+            expendsRepository.deleteAll(e);
         }
 
         if (budgetRepository.existsById(budgetId)) {
