@@ -2,9 +2,11 @@ package com.budget.app.services;
 
 import com.budget.app.model.UserBudget;
 import com.budget.app.model.Budget;
+import com.budget.app.model.Expends;
 import com.budget.app.model.User;
 import com.budget.app.repository.UserBudgetRepository;
 import com.budget.app.repository.BudgetRepository;
+import com.budget.app.repository.ExpendsRepository;
 import com.budget.app.repository.UserRepository;
 import com.budget.app.vo.BudgetSimpleVo;
 import com.budget.app.vo.UserBudgetResponseVo;
@@ -20,11 +22,13 @@ public class UserBudgetService {
     private final UserBudgetRepository userBudgetRepository;
     private final BudgetRepository budgetRepository;
     private final UserRepository userRepository;
+    private final ExpendsRepository expendsRepository;
 
-    public UserBudgetService(UserBudgetRepository userBudgetRepository, BudgetRepository budgetRepository, UserRepository userRepository) {
+    public UserBudgetService(UserBudgetRepository userBudgetRepository, BudgetRepository budgetRepository, UserRepository userRepository, ExpendsRepository expendsRepository) {
         this.userBudgetRepository = userBudgetRepository;
         this.budgetRepository = budgetRepository;
         this.userRepository = userRepository;
+        this.expendsRepository = expendsRepository;
     }
 
     public List<UserBudgetResponseVo> getUserBudgetByUserId(Long userId) {
@@ -73,12 +77,20 @@ public class UserBudgetService {
     }
 
     public void deleteUserBudget(Long userBudgetId) {
-        if (userBudgetRepository.existsById(userBudgetId)){
-            userBudgetRepository.deleteById(userBudgetId);
-        } else {
+        UserBudget ub = userBudgetRepository.findByUserBudgetId(userBudgetId);
+        
+        if (!userBudgetRepository.existsById(userBudgetId)){
             throw new IllegalArgumentException("User expends link not found: " + userBudgetId);
         }
-        
+        System.out.println(ub);
+        if (ub != null) {
+            List<Expends> e = expendsRepository.findByUser_UserIdAndBudget_BudgetId(ub.getUserId().getUserId(), ub.getBudgetId().getBudgetId());
+            System.out.println(e);
+            expendsRepository.deleteAll(e);
+        }
+        if (ub != null) {
+            userBudgetRepository.delete(ub);
+        }   
     }
 
     public void deleteUserPhoneBudget(UserBudgetVo userBudget) {
@@ -88,15 +100,22 @@ public class UserBudgetService {
             throw new IllegalArgumentException("User not found : " + userBudget.getPhoneNumber());
         }
 
-
         UserBudget ub = userBudgetRepository.findByUserId_UserIdAndBudgetId_BudgetId(user.getUserId(),userBudget.getBudgetId());
-        
 
-        if (ub != null){
-            userBudgetRepository.delete(ub);
-        } else {
-            throw new IllegalArgumentException("User expends link not found.");
+        if (ub == null){
+            throw new IllegalArgumentException("User expends link not found: " + userBudget.getPhoneNumber());
         }
+        
+        if (ub != null) {
+            List<Expends> e = expendsRepository.findByUser_UserIdAndBudget_BudgetId(ub.getUserId().getUserId(), ub.getBudgetId().getBudgetId());
+
+            if (!e.isEmpty()){
+                expendsRepository.deleteAll(e);
+            }
+        }
+        if (ub != null) {
+            userBudgetRepository.delete(ub);
+        }   
         
     }
 
@@ -115,7 +134,6 @@ public class UserBudgetService {
                         BudgetSimpleVo.builder()
                                 .budgetId(ub.getBudgetId().getBudgetId())
                                 .budgetName(ub.getBudgetId().getBudgetName())
-                                .commentary(ub.getBudgetId().getCommentary())
                                 .build()
                 )
                 .build();

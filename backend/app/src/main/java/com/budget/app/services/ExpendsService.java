@@ -103,9 +103,6 @@ public class ExpendsService {
         }
     }
 
-    // =========================
-    // 🔁 Mapper interne
-    // =========================
     private ExpendsResponseVo toResponseVo(Expends expends) {
 
         return ExpendsResponseVo.builder()

@@ -102,30 +102,25 @@ public class UserService {
 
     public UserTokenResponseVo validateUserCredentialsAndGenerateToken(UserLoginRequestVo userRequestVo) {
 
-        // 1️⃣ Validation des inputs
         if (userRequestVo.getUsername() == null || userRequestVo.getUsername().isBlank()
                 || userRequestVo.getPassword() == null || userRequestVo.getPassword().isBlank()) {
             throw new IllegalArgumentException("Username and password are required");
         }
 
-        // 2️⃣ Recherche utilisateur
         User user = userRepository.findByUserName(userRequestVo.getUsername());
 
         if (user == null) {
             throw new IllegalArgumentException("Invalid credentials");
         }
 
-        // 3️⃣ Vérification mot de passe
         if (!bCryptPasswordEncoder.matches(
                 userRequestVo.getPassword(),
                 user.getPassword())) {
             throw new IllegalArgumentException("Invalid credentials");
         }
 
-        // 4️⃣ Génération du JWT avec userId
         String token = createJsonWebToken(user.getUserId());
 
-        // 5️⃣ Invalidation ancien token (1 session max)
         UserLogin lastLogin = userLoginRepository
                 .findByUser_UserId(user.getUserId());
 
@@ -133,7 +128,6 @@ public class UserService {
             userLoginRepository.deleteById(lastLogin.getUserLoginId());
         }
 
-        // 6️⃣ Sauvegarde nouveau token
         UserLogin userLogin = UserLogin.builder()
                 .user(user)
                 .token(token)
@@ -142,7 +136,6 @@ public class UserService {
 
         userLoginRepository.save(userLogin);
 
-        // 7️⃣ Réponse
         return UserTokenResponseVo.builder()
                 .userId(user.getUserId())
                 .token(token)

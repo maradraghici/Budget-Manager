@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserBudgetRepository extends JpaRepository<UserBudget, Long>{
+    public UserBudget findById(long userBudgetId);
     public List<UserBudget> findByUserId_UserId(Long userId);
     public UserBudget findByUserBudgetId(Long userBudgetId);
     public List<UserBudget> findByBudgetId_BudgetId(Long budgetId);
