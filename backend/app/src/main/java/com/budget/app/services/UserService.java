@@ -201,8 +201,9 @@ public class UserService {
     }
 
     public void deleteUser(Long userId){
-        budgetService.deleteBudgetByUserId(userId);
+        
         expendsService.deleteExpendsByUserId(userId);
+        budgetService.deleteBudgetByUserId(userId);
 
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
