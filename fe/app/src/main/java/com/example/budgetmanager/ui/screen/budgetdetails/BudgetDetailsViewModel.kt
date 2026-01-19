@@ -107,7 +107,8 @@ class BudgetDetailsViewModel @Inject constructor(
                     _state.value = _state.value.copy(
                         showAddExpense = false,
                         newExpenseName = "",
-                        newExpensePrice = ""
+                        newExpensePrice = "",
+                        newExpenseDescription = ""
                     )
                 } else {
                     _state.value = _state.value.copy(
@@ -272,6 +273,7 @@ class BudgetDetailsViewModel @Inject constructor(
             _state.value = _state.value.copy(isLoading = true)
             val response = budgetRepository.removeUserFromBudget(_state.value.removeUserPhoneNumber, id)
             if (response.isSuccessful) {
+                loadBudgetDetails()
                 _effect.emit(BudgetDetailsEffect.OnBudgetDetailsChanged("User removed successfully"))
             } else {
                 _effect.emit(BudgetDetailsEffect.OnBudgetDetailsChanged("Failed to remove user"))
