@@ -1,5 +1,6 @@
 package com.example.budgetmanager.ui.screen.summary
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -45,6 +46,7 @@ class SummaryViewModel @Inject constructor(
     private val _state = MutableStateFlow(SummaryState())
     val state = _state.asStateFlow()
 
+    @SuppressLint("DefaultLocale")
     private fun loadBudgetDetails() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
@@ -70,7 +72,13 @@ class SummaryViewModel @Inject constructor(
                 )
             }
 
-            val totalAmount = _state.value.expenses.sumOf { it.amount }
+            val totalAmount = String
+                .format("%.2f", _state.value.expenses.sumOf {
+                    if (it.user in _state.value.users)
+                        it.amount
+                    else
+                        0.0
+                }).toDouble()
 
             val totalPerUserList = _state.value.users.map { user ->
                 val totalPaidByUser = _state.value.expenses

@@ -23,6 +23,7 @@ import javax.inject.Inject
 
 data class BudgetDetailsState(
     val expenses: List<Expense> = emptyList(),
+    val users: List<User> = emptyList(),
     val budgetTitle: String = "",
     val showOptions: Boolean = false,
     val showDeleteExpense: Boolean = false,
@@ -177,10 +178,25 @@ class BudgetDetailsViewModel @Inject constructor(
                 _state.value = _state.value.copy(userId = it)
             }
 
+            val responseOwner = budgetRepository.getBudgetOwnerById(id)
+            if (responseOwner.isSuccessful && responseOwner.body() != null) {
+                _state.value = _state.value.copy(
+                    users = listOf(responseOwner.body()!!)
+                )
+            }
+
+            val responseMembers = budgetRepository.getBudgetMembersById(id)
+            if (responseMembers.isSuccessful && responseMembers.body() != null) {
+                _state.value = _state.value.copy(
+                    users = _state.value.users + responseMembers.body()!!
+                )
+            }
+
             val response = expensesRepository.getExpenses(id)
             if (response.isSuccessful && response.body() != null) {
+                val expenses = response.body()!!
                 _state.value = _state.value.copy(
-                    expenses = response.body()!!
+                    expenses = expenses.filter { it.user in _state.value.users }
                 )
             }
             _state.value = _state.value.copy(
