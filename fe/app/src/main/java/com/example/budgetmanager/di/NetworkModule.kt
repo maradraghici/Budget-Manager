@@ -18,7 +18,7 @@ import javax.inject.Singleton
 object NetworkModule {
 
     // TODO: Change for the actual base URL of the backend when you run it on a different device
-    private const val BASE_URL = "http://192.168.1.152:8210/"
+    private const val BASE_URL = "http://192.168.1.146:8210/"
 
     @Singleton
     @Provides
