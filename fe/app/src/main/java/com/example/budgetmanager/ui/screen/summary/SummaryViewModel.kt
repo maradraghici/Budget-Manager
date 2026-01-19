@@ -76,13 +76,16 @@ class SummaryViewModel @Inject constructor(
                 val totalPaidByUser = _state.value.expenses
                     .filter { it.user == user }
                     .sumOf { it.amount }
-                UserSpent(username = user.username, amount = totalPaidByUser)
+                val roundedTotal = String.format("%.2f", totalPaidByUser).toDouble()
+                UserSpent(username = user.username, amount = roundedTotal)
             }
 
             if (_state.value.users.isEmpty() || _state.value.users.size == 1) {
                 _state.value = _state.value.copy(
                     total = totalAmount,
-                    debts = emptyList()
+                    totalPerUserList = totalPerUserList,
+                    debts = emptyList(),
+                    isLoading = false
                 )
                 return@launch
             }
@@ -114,13 +117,14 @@ class SummaryViewModel @Inject constructor(
                 val amountToReceive = abs(creditorBalances[creditorIndex])
 
                 val settlementAmount = minOf(amountOwed, amountToReceive)
+                val roundedAmount = String.format("%.2f", settlementAmount).toDouble()
 
                 if (settlementAmount > 0.01) {
                     calculatedDebts.add(
                         Debt(
                             from = creditorName,
                             to = debtorName,
-                            amount = settlementAmount
+                            amount = roundedAmount
                         )
                     )
                 }

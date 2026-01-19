@@ -44,11 +44,15 @@ fun BudgetDetailsScreenDestination(
 ) {
     val vm: BudgetDetailsViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
             when (effect) {
                 is BudgetDetailsEffect.OnSummaryClick -> navigateToSummary(effect.id)
+                is BudgetDetailsEffect.OnBudgetDetailsChanged -> {
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -77,6 +81,7 @@ private fun BudgetDetailsScreen(
             items(state.expenses) { expense ->
                 ExpenseCard(
                     expense = expense,
+                    showDelete = state.userId == expense.user.id,
                     onClick = { onEvent(BudgetDetailsEvent.OnExpenseClicked(expense.id, expense.user.id)) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -170,6 +175,14 @@ private fun BudgetDetailsScreen(
                 val priceRegex = Regex("^[0-9]+(\\.[0-9]{0,2})?$")
                 if (it.isEmpty() || it.matches(priceRegex)) {
                     onEvent(BudgetDetailsEvent.NewExpensePriceChanged(it))
+                }
+            },
+            thirdField = true,
+            thirdFieldLabel = "Description",
+            thirdFieldValue = state.newExpenseDescription,
+            thirdFieldValueChange = {
+                if (state.newExpenseDescription.length < 100) {
+                    onEvent(BudgetDetailsEvent.NewExpenseDescriptionChanged(it))
                 }
             },
             secondFieldKeyboardType = KeyboardType.Decimal

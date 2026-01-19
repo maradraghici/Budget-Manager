@@ -25,6 +25,7 @@ fun ExpenseResponse.toExpense(): Expense {
         id = id,
         name = name,
         amount = amount,
+        description = description,
         user = paidBy.toUser(),
         date = parsedDate.format(formatter)
     )
