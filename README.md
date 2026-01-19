@@ -1,2 +1,2 @@
 # Budget-Manager
-frontend and baackend
+frontend and backend
