@@ -33,6 +33,10 @@ public class ExpendsService {
             throw new IllegalArgumentException("Amount is required");
         }
         
+        if (expendsVo.getAmount() == 0.0){
+            throw new IllegalArgumentException("Amount can't be 0.0");
+        }
+
         if (expendsVo.getExpendsName() == null || expendsVo.getExpendsName().isBlank()){
             throw new IllegalArgumentException("Expends name is required");
         }
